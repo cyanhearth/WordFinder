@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">WordFinder</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="enter_letters">Enter your letters...</string>
+    <string name="no_data">There are no words using these letters!</string>
+
+    <string name="button_find">How many words?</string>
+    <string name="button_check">Is it there?</string>
+    <string name="title_activity_display_result">Result</string>
+
+    <string-array name="dictionaries">
+        <item>sowpods</item>
+        <item>ospd</item>
+    </string-array>
+</resources>
