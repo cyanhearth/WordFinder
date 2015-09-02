@@ -6,33 +6,20 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.preference.Preference;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.PopupMenu;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 
 public class MainActivity extends ActionBarActivity
-        implements LoadDictionaryFragment.TaskCallbacks, DisplayResultFragment.SelectionListener,
-        SharedPreferences.OnSharedPreferenceChangeListener{
+        implements LoadDictionaryFragment.TaskCallbacks, DisplayResultFragment.SelectionListener{
     static private final String BASE_URI = "https://en.wiktionary.org/wiki/";
     static private final String CHOOSER_TEXT = "Open with...";
     static private final String STATE_LETTERS = "state_letters";
@@ -46,9 +33,7 @@ public class MainActivity extends ActionBarActivity
     private Button clear;
 
     // holds all of the dictionary words
-    private HashSet<String> words;
-
-    private boolean dictChanged = false;
+    public static HashSet<String> words;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,8 +42,6 @@ public class MainActivity extends ActionBarActivity
         setContentView(R.layout.activity_main);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-
-        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         find = (Button)findViewById(R.id.button);
         check = (Button)findViewById(R.id.button2);
@@ -103,7 +86,9 @@ public class MainActivity extends ActionBarActivity
             @Override
             public void onClick(View v) {
                 find.setEnabled(false);
-                new FindWordsTask().execute(lettersInput.getText().toString());
+                manager.beginTransaction()
+                        .replace(R.id.fragment_container, DisplayResultFragment.newInstance(lettersInput.getText().toString()),
+                                TAG_RESULTS_FRAGMENT).commit();
             }
         });
 
@@ -139,6 +124,13 @@ public class MainActivity extends ActionBarActivity
                 }
             }
         });
+    }
+
+    @Override
+    public void enableButtons() {
+        find.setEnabled(true);
+        check.setEnabled(true);
+        clear.setEnabled(true);
     }
 
     public void sendIntentForDefinition(String word) {
@@ -182,20 +174,22 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .registerOnSharedPreferenceChangeListener(this);
 
-        if (dictChanged) {
-            String dict = PreferenceManager.getDefaultSharedPreferences(this).getString("dictionary", "sowpods");
+        String dict = PreferenceManager.getDefaultSharedPreferences(this).getString("dictionary", "sowpods");
+
+        if (!dict.equals(LoadDictionaryFragment.currentDict)) {
             FragmentManager manager = this.getFragmentManager();
             manager.beginTransaction().remove(manager.findFragmentByTag(TAG_TASK_FRAGMENT)).commit();
             find.setEnabled(false);
             check.setEnabled(false);
             manager.beginTransaction().add(LoadDictionaryFragment.newInstance(dict), TAG_TASK_FRAGMENT).commit();
-
-            dictChanged = false;
 
             Toast.makeText(this, "Dictionary changed - " + dict, Toast.LENGTH_LONG).show();
         }
@@ -207,57 +201,18 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .unregisterOnSharedPreferenceChangeListener(this);
     }
 
     public boolean isValidWord(String word) {
         return words.contains(word.toLowerCase());
-    }
-
-    public ArrayList<String> possibleWords(String letters) {
-        // hold results
-        ArrayList<String> results = new ArrayList<>();
-
-        // sort the letters we want to make words from
-        char[] lettersToChar = letters.toLowerCase().toCharArray();
-        Arrays.sort(lettersToChar);
-
-        for (String s : words) {
-            // if the word contains too many letters move onto the next one
-            if (s.length() > letters.length()) continue;
-
-            // sort the characters in the word
-            char[] sToChar = s.toCharArray();
-            Arrays.sort(sToChar);
-
-            // keeps track of where we last found a match
-            int n = 0;
-            // count the letter matches made, if this equals the number of letters
-            // in the word then it will be added to the result
-            int count = 0;
-
-            // look for each of the search letters
-            for (char c : lettersToChar) {
-                for (int j = n; j < sToChar.length; j++) {
-                    // if the letter is found in the word, increment count
-                    // and set n to the index we start searching for the next letter
-                    if (c == sToChar[j]) {
-                        count++;
-                        n = j + 1;
-                        break;
-                    }
-                }
-            }
-            // if the count equals the word length
-            // add it to the result
-            if (count == s.length()) results.add(s);
-        }
-
-        return results;
-
     }
 
     // LoadDictionaryFragment.TaskCallbacks methods
@@ -273,7 +228,7 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onPostExecute() {
-        this.words = LoadDictionaryFragment.words;
+        words = LoadDictionaryFragment.words;
         find.setEnabled(true);
         check.setEnabled(true);
     }
@@ -307,15 +262,7 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        String dict = sharedPreferences.getString(key, "sowpods");
-        if (!dict.equals(LoadDictionaryFragment.currentDict)) {
-            dictChanged = true;
-        }
-    }
-
-    private class FindWordsTask extends AsyncTask<String, Void, ArrayList<String>> {
+    /*private class FindWordsTask extends AsyncTask<String, Void, ArrayList<String>> {
 
         protected ArrayList<String> doInBackground(String... letters) {
             ArrayList<String> results = possibleWords(letters[0]);
@@ -348,5 +295,5 @@ public class MainActivity extends ActionBarActivity
         }
 
 
-    }
+    }*/
 }
