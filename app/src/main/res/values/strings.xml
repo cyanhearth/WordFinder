@@ -9,6 +9,11 @@
     <string name="button_find">How many words?</string>
     <string name="button_check">Is it there?</string>
     <string name="title_activity_display_result">Result</string>
+    <string name="clear">Clear</string>
+    <string name="change_dict">Change dictionary...</string>
+
+    <string name="sowpods">sowpods</string>
+    <string name="ospd">ospd</string>
 
     <string-array name="dictionaries">
         <item>sowpods</item>

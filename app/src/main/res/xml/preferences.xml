@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Settings"></PreferenceCategory>
+    <ListPreference
+        android:title="Dictionary"
+        android:key="dictionary"
+        android:entries="@array/dictionaries"
+        android:entryValues="@array/dictionaries"
+        android:defaultValue="@string/sowpods"/>
+
+</PreferenceScreen>

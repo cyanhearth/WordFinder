@@ -4,8 +4,12 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.Preference;
+import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -15,6 +19,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.PopupMenu;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,7 +31,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 
 public class MainActivity extends ActionBarActivity
-        implements LoadDictionaryFragment.TaskCallbacks, DisplayResultFragment.SelectionListener{
+        implements LoadDictionaryFragment.TaskCallbacks, DisplayResultFragment.SelectionListener,
+        SharedPreferences.OnSharedPreferenceChangeListener{
     static private final String BASE_URI = "https://en.wiktionary.org/wiki/";
     static private final String CHOOSER_TEXT = "Open with...";
     static private final String STATE_LETTERS = "state_letters";
@@ -42,11 +48,15 @@ public class MainActivity extends ActionBarActivity
     // holds all of the dictionary words
     private HashSet<String> words;
 
+    private boolean dictChanged = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
@@ -54,7 +64,6 @@ public class MainActivity extends ActionBarActivity
         check = (Button)findViewById(R.id.button2);
         clear = (Button)findViewById(R.id.button3);
         lettersInput = (TextView)findViewById(R.id.editText);
-        Spinner spinner = (Spinner)findViewById(R.id.spinner);
 
         // restore state
         if (savedInstanceState != null) {
@@ -78,7 +87,8 @@ public class MainActivity extends ActionBarActivity
             find.setEnabled(false);
             check.setEnabled(false);
 
-            dictFragment = LoadDictionaryFragment.newInstance("sowpods");
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            dictFragment = LoadDictionaryFragment.newInstance(preferences.getString("dictionary", "sowpods"));
             transaction.add(dictFragment, TAG_TASK_FRAGMENT);
         }
         else {
@@ -87,33 +97,6 @@ public class MainActivity extends ActionBarActivity
 
         transaction.commit();
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                this,
-                R.array.dictionaries,
-                android.R.layout.simple_spinner_dropdown_item
-        );
-
-        spinner.setAdapter(adapter);
-
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String res = parent.getItemAtPosition(position).toString();
-
-                if (!res.equals(LoadDictionaryFragment.currentDict)) {
-                    manager.beginTransaction().remove(manager.findFragmentByTag(TAG_TASK_FRAGMENT)).commit();
-                    find.setEnabled(false);
-                    check.setEnabled(false);
-                    manager.beginTransaction().add(LoadDictionaryFragment.newInstance(res), TAG_TASK_FRAGMENT).commit();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
 
         // set "How many words" button function
         find.setOnClickListener(new View.OnClickListener() {
@@ -189,11 +172,45 @@ public class MainActivity extends ActionBarActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_overflow) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(this);
+
+        if (dictChanged) {
+            String dict = PreferenceManager.getDefaultSharedPreferences(this).getString("dictionary", "sowpods");
+            FragmentManager manager = this.getFragmentManager();
+            manager.beginTransaction().remove(manager.findFragmentByTag(TAG_TASK_FRAGMENT)).commit();
+            find.setEnabled(false);
+            check.setEnabled(false);
+            manager.beginTransaction().add(LoadDictionaryFragment.newInstance(dict), TAG_TASK_FRAGMENT).commit();
+
+            dictChanged = false;
+
+            Toast.makeText(this, "Dictionary changed - " + dict, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(this);
     }
 
     public boolean isValidWord(String word) {
@@ -287,6 +304,14 @@ public class MainActivity extends ActionBarActivity
         }
         else {
             lettersInput.setText(lettersInput.getText() + letter);
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        String dict = sharedPreferences.getString(key, "sowpods");
+        if (!dict.equals(LoadDictionaryFragment.currentDict)) {
+            dictChanged = true;
         }
     }
 

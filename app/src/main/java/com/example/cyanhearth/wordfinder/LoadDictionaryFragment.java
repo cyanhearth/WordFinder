@@ -22,7 +22,6 @@ public class LoadDictionaryFragment extends Fragment {
     }
 
     private TaskCallbacks callbacks;
-    private LoadDictionaryTask task;
     public static String currentDict;
 
     public static HashSet<String> words;
@@ -56,7 +55,7 @@ public class LoadDictionaryFragment extends Fragment {
         setRetainInstance(true);
 
         // Create and execute the background task.
-        task = new LoadDictionaryTask();
+        LoadDictionaryTask task = new LoadDictionaryTask();
         task.execute(currentDict);
     }
 
