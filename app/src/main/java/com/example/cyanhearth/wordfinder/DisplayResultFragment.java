@@ -2,12 +2,15 @@ package com.example.cyanhearth.wordfinder;
 
 import android.app.Activity;
 import android.app.ListFragment;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,7 +29,7 @@ public class DisplayResultFragment extends ListFragment {
         void enableButtons();
     }
 
-    private SelectionListener mCallback;
+    private WeakReference<SelectionListener> callbacks;
 
     public static DisplayResultFragment newInstance(String lettersInput) {
         letters = lettersInput;
@@ -56,7 +59,7 @@ public class DisplayResultFragment extends ListFragment {
 
         try {
 
-            mCallback = (SelectionListener) activity;
+            callbacks = new WeakReference<>((SelectionListener) activity);
 
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
@@ -65,16 +68,17 @@ public class DisplayResultFragment extends ListFragment {
 
     }
 
+
     @Override
     public void onListItemClick(ListView l, View view, int position, long id) {
 
         // Notify the hosting Activity that a selection has been made.
 
-        mCallback.onItemSelected(position);
+        callbacks.get().onItemSelected(position);
 
     }
 
-    public ArrayList<String> possibleWords(String letters, Iterable<String> words) {
+    public ArrayList<String> possibleWords(String letters, Iterable<String> words, int minLength) {
         // hold results
         ArrayList<String> results = new ArrayList<>();
 
@@ -84,7 +88,7 @@ public class DisplayResultFragment extends ListFragment {
 
         for (String s : words) {
             // if the word contains too many letters move onto the next one
-            if (s.length() > letters.length()) continue;
+            if (s.length() > letters.length() || s.length() < minLength) continue;
 
             // sort the characters in the word
             char[] sToChar = s.toCharArray();
@@ -120,7 +124,14 @@ public class DisplayResultFragment extends ListFragment {
     private class FindWordsTask extends AsyncTask<String, Void, ArrayList<String>> {
 
         protected ArrayList<String> doInBackground(String... letters) {
-            ArrayList<String> results = possibleWords(letters[0], MainActivity.words);
+            int minLetters = Integer.parseInt(PreferenceManager.
+                    getDefaultSharedPreferences((MainActivity) callbacks.get())
+                    .getString("word_length", "3"));
+
+            if (minLetters == 0) {
+                minLetters = letters[0].length();
+            }
+            ArrayList<String> results = possibleWords(letters[0], MainActivity.words, minLetters);
             // sort alphabetically
             Collections.sort(results);
             // sort by length, longest to shortest
@@ -143,8 +154,11 @@ public class DisplayResultFragment extends ListFragment {
 
         protected void onPostExecute(ArrayList<String> results) {
             finalResults = results;
-            setListAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, finalResults));
-            mCallback.enableButtons();
+
+            setListAdapter(new ArrayAdapter<>(getActivity(),
+                    android.R.layout.simple_list_item_1, finalResults));
+            if (callbacks != null)
+                callbacks.get().enableButtons();
         }
 
     }

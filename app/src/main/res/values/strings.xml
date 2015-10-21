@@ -14,9 +14,9 @@
 
     <string name="sowpods">sowpods</string>
     <string name="ospd">ospd</string>
+    <string name="current_dict">Dictionary - </string>
+    <string name="min_length">Minimum length - </string>
+    <string name="dict_changed">Dictionary changed - </string>
+    <string name="length_changed">Minimum length changed - </string>
 
-    <string-array name="dictionaries">
-        <item>sowpods</item>
-        <item>ospd</item>
-    </string-array>
 </resources>

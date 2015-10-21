@@ -8,6 +8,7 @@ import android.os.Bundle;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.util.HashSet;
 
 /**
@@ -21,7 +22,7 @@ public class LoadDictionaryFragment extends Fragment {
         void onPostExecute();
     }
 
-    private TaskCallbacks callbacks;
+    private WeakReference<TaskCallbacks> callbacks;
     public static String currentDict;
 
     public static HashSet<String> words;
@@ -29,6 +30,11 @@ public class LoadDictionaryFragment extends Fragment {
     public static LoadDictionaryFragment newInstance (String res) {
         currentDict = res;
         return new LoadDictionaryFragment();
+    }
+
+    public void startTask() {
+        LoadDictionaryTask task = new LoadDictionaryTask();
+        task.execute(currentDict);
     }
 
     /**
@@ -40,7 +46,7 @@ public class LoadDictionaryFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        callbacks = (TaskCallbacks) activity;
+        callbacks =  new WeakReference<>((TaskCallbacks)activity);
     }
 
     /**
@@ -55,19 +61,9 @@ public class LoadDictionaryFragment extends Fragment {
         setRetainInstance(true);
 
         // Create and execute the background task.
-        LoadDictionaryTask task = new LoadDictionaryTask();
-        task.execute(currentDict);
+        startTask();
     }
 
-    /**
-     * Set the callback to null so we don't accidentally leak the
-     * Activity instance.
-     */
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        callbacks = null;
-    }
 
     private class LoadDictionaryTask extends AsyncTask<String, Void, Void> {
 
@@ -88,7 +84,8 @@ public class LoadDictionaryFragment extends Fragment {
             }
 
             //read in dictionary
-            BufferedReader st = new BufferedReader(new InputStreamReader(getResources().openRawResource(resourceId)));
+            BufferedReader st = new BufferedReader(new InputStreamReader(getResources()
+                    .openRawResource(resourceId)));
 
             try {
                 String line;
@@ -105,7 +102,7 @@ public class LoadDictionaryFragment extends Fragment {
 
         protected void onPostExecute(Void args) {
             if (callbacks != null)
-                callbacks.onPostExecute();
+                callbacks.get().onPostExecute();
         }
     }
 }

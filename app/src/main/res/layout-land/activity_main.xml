@@ -6,16 +6,31 @@
     <RelativeLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/editText"
-            android:hint="@string/enter_letters"
-            android:layout_marginTop="54dp"
-            android:layout_centerHorizontal="true"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:gravity="center_horizontal" />
+        android:layout_weight="1"
+        android:paddingRight="15dp">
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/current_dict"
+                android:id="@+id/currentDict"
+                android:gravity="center_horizontal"
+                android:paddingTop="10dp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/min_length"
+                android:id="@+id/minLength"
+                android:layout_gravity="right"
+                android:gravity="center_horizontal"
+                android:paddingTop="10dp" />
+        </LinearLayout>
 
         <LinearLayout
             android:orientation="horizontal"
@@ -23,10 +38,11 @@
             android:layout_height="wrap_content"
             style="?android:buttonBarStyle"
             android:id="@+id/linearLayout"
-            android:layout_below="@+id/editText"
-            android:layout_centerHorizontal="true"
             android:paddingTop="10dp"
-            android:paddingBottom="10dp">
+            android:paddingBottom="10dp"
+            android:layout_above="@+id/linearLayout2"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true">
 
             <Button
                 android:layout_width="0dp"
@@ -49,10 +65,12 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/linearLayout"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="43dp"
+            android:id="@+id/linearLayout2"
+            android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:gravity="center_horizontal">
+            android:layout_alignParentStart="true">
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -63,12 +81,31 @@
 
     </RelativeLayout>
 
-    <FrameLayout
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
         android:layout_weight="1.5"
-        android:id="@+id/fragment_container">
+        android:layout_height="match_parent">
 
-    </FrameLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/editText"
+            android:hint="@string/enter_letters"
+            android:layout_marginTop="54dp"
+            android:layout_centerHorizontal="true"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center_horizontal|top" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1.5"
+            android:id="@+id/fragment_container">
+
+        </FrameLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

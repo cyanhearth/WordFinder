@@ -20,8 +20,9 @@ public class WordDialogFragment extends DialogFragment {
 
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         return new AlertDialog.Builder(getActivity())
-                .setMessage(word + " is in the current dictionary.\n\nWould you like to find the definition?\n" +
-                        "(Note: requires internet access)")
+                .setMessage(word +
+                        " is in the current dictionary.\n\nWould you like to find the definition?\n"
+                        + "(Note: requires internet access)")
                 .setCancelable(false)
                 .setNegativeButton("No",
                         new DialogInterface.OnClickListener() {
@@ -34,7 +35,6 @@ public class WordDialogFragment extends DialogFragment {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                // TODO: open browser and get word definition
                                 ((MainActivity) getActivity()).sendIntentForDefinition(word);
                             }
                         }).create();

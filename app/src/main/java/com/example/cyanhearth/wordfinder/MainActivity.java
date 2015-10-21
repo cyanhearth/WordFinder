@@ -28,12 +28,16 @@ public class MainActivity extends ActionBarActivity
     private static final String TAG_RESULTS_FRAGMENT = "results_fragment";
     private static final String TAG_KEYBOARD_FRAGMENT = "keyboard_fragment";
     private TextView lettersInput;
+    private TextView currentDict;
+    private TextView minLength;
     private Button find;
     private Button check;
     private Button clear;
 
     // holds all of the dictionary words
     public static HashSet<String> words;
+
+    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +47,20 @@ public class MainActivity extends ActionBarActivity
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         find = (Button)findViewById(R.id.button);
         check = (Button)findViewById(R.id.button2);
         clear = (Button)findViewById(R.id.button3);
         lettersInput = (TextView)findViewById(R.id.editText);
+
+        currentDict = (TextView) findViewById(R.id.currentDict);
+        minLength = (TextView) findViewById(R.id.minLength);
+
+        currentDict.setText(currentDict.getText().toString() + " "
+                + preferences.getString(SettingsActivity.DICTIONARY_KEY, ""));
+        minLength.setText(minLength.getText().toString() + " "
+                + preferences.getString(SettingsActivity.MIN_LENGTH_KEY, ""));
 
         // restore state
         if (savedInstanceState != null) {
@@ -55,13 +69,17 @@ public class MainActivity extends ActionBarActivity
 
         // set up fragments
         final FragmentManager manager = getFragmentManager();
-        LoadDictionaryFragment dictFragment = (LoadDictionaryFragment) manager.findFragmentByTag(TAG_TASK_FRAGMENT);
+        LoadDictionaryFragment dictFragment =
+                (LoadDictionaryFragment) manager.findFragmentByTag(TAG_TASK_FRAGMENT);
         KeyboardFragment keyboardFragment = KeyboardFragment.newInstance();
         FragmentTransaction transaction = manager.beginTransaction();
 
         if (manager.findFragmentByTag(TAG_RESULTS_FRAGMENT) == null) {
             clear.setEnabled(false);
             transaction.replace(R.id.fragment_container, keyboardFragment, TAG_KEYBOARD_FRAGMENT);
+        }
+        else {
+            find.setEnabled(false);
         }
 
         // If the Fragment is non-null, then it is currently being
@@ -70,12 +88,12 @@ public class MainActivity extends ActionBarActivity
             find.setEnabled(false);
             check.setEnabled(false);
 
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            dictFragment = LoadDictionaryFragment.newInstance(preferences.getString("dictionary", "sowpods"));
+            dictFragment = LoadDictionaryFragment
+                    .newInstance(preferences.getString("dictionary", "sowpods"));
             transaction.add(dictFragment, TAG_TASK_FRAGMENT);
         }
         else {
-            this.words = LoadDictionaryFragment.words;
+            words = LoadDictionaryFragment.words;
         }
 
         transaction.commit();
@@ -85,10 +103,18 @@ public class MainActivity extends ActionBarActivity
         find.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                find.setEnabled(false);
-                manager.beginTransaction()
-                        .replace(R.id.fragment_container, DisplayResultFragment.newInstance(lettersInput.getText().toString()),
-                                TAG_RESULTS_FRAGMENT).commit();
+                String letters = lettersInput.getText().toString();
+                if (letters.equals("")) {
+                    Toast.makeText(MainActivity.this, "Please enter some letters!",
+                            Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    find.setEnabled(false);
+                    manager.beginTransaction()
+                            .replace(R.id.fragment_container,
+                                    DisplayResultFragment.newInstance(letters),
+                                    TAG_RESULTS_FRAGMENT).commit();
+                }
             }
         });
 
@@ -107,7 +133,8 @@ public class MainActivity extends ActionBarActivity
                             " is not in the current dictionary", Toast.LENGTH_LONG).show();
                 }
                 else {
-                    Toast.makeText(getApplicationContext(), "Please enter a word first!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Please enter a word first!",
+                            Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -119,18 +146,13 @@ public class MainActivity extends ActionBarActivity
                 clear.setEnabled(false);
                 lettersInput.setText("");
                 if (manager.findFragmentByTag(TAG_RESULTS_FRAGMENT) != null) {
-                    manager.beginTransaction().replace(R.id.fragment_container, KeyboardFragment.newInstance(),
+                    manager.beginTransaction().replace(R.id.fragment_container,
+                            KeyboardFragment.newInstance(),
                             TAG_KEYBOARD_FRAGMENT).commit();
                 }
+                find.setEnabled(true);
             }
         });
-    }
-
-    @Override
-    public void enableButtons() {
-        find.setEnabled(true);
-        check.setEnabled(true);
-        clear.setEnabled(true);
     }
 
     public void sendIntentForDefinition(String word) {
@@ -182,16 +204,31 @@ public class MainActivity extends ActionBarActivity
     protected void onResume() {
         super.onResume();
 
-        String dict = PreferenceManager.getDefaultSharedPreferences(this).getString("dictionary", "sowpods");
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        String dict = preferences.getString(SettingsActivity.DICTIONARY_KEY, "");
+
+        String wordLength = preferences.getString(SettingsActivity.MIN_LENGTH_KEY, "");
+
+        if (wordLength.equals("0")) {
+            wordLength = "All letters";
+        }
+
+        minLength.setText(getResources().getText(R.string.min_length) + " " + wordLength);
 
         if (!dict.equals(LoadDictionaryFragment.currentDict)) {
+
+
             FragmentManager manager = this.getFragmentManager();
-            manager.beginTransaction().remove(manager.findFragmentByTag(TAG_TASK_FRAGMENT)).commit();
+
+            LoadDictionaryFragment dictFragment = (LoadDictionaryFragment) manager.findFragmentByTag(TAG_TASK_FRAGMENT);
+            dictFragment.currentDict = dict;
+            dictFragment.startTask();
+
             find.setEnabled(false);
             check.setEnabled(false);
-            manager.beginTransaction().add(LoadDictionaryFragment.newInstance(dict), TAG_TASK_FRAGMENT).commit();
 
-            Toast.makeText(this, "Dictionary changed - " + dict, Toast.LENGTH_LONG).show();
+            currentDict.setText(getResources().getText(R.string.current_dict) + " " + dict);
         }
     }
 
@@ -233,9 +270,9 @@ public class MainActivity extends ActionBarActivity
         check.setEnabled(true);
     }
 
+    // DisplayResultFragment.SelectionListener methods
     // dispatch intent to retrieve word definition when a word is selected
     // from the list
-    // DisplayResultFragment.SelectionListener method
     @Override
     public void onItemSelected(int position) {
 
@@ -245,6 +282,12 @@ public class MainActivity extends ActionBarActivity
         if (frag != null)
             sendIntentForDefinition(frag.getListAdapter().getItem(position).toString());
 
+    }
+
+    @Override
+    public void enableButtons() {
+        check.setEnabled(true);
+        clear.setEnabled(true);
     }
 
     // onClick used by keyboard buttons
@@ -261,39 +304,4 @@ public class MainActivity extends ActionBarActivity
             lettersInput.setText(lettersInput.getText() + letter);
         }
     }
-
-    /*private class FindWordsTask extends AsyncTask<String, Void, ArrayList<String>> {
-
-        protected ArrayList<String> doInBackground(String... letters) {
-            ArrayList<String> results = possibleWords(letters[0]);
-            // sort alphabetically
-            Collections.sort(results);
-            // sort by length, longest to shortest
-            Collections.sort(results, new Comparator<String>() {
-
-                @Override
-                public int compare(String s1, String s2) {
-                    if (s1.length() > s2.length())
-                        return -1;
-                    else if (s1.length() < s2.length())
-                        return 1;
-                    else {
-                        return 0;
-                    }
-                }
-            });
-
-            return results;
-        }
-
-        protected void onPostExecute(ArrayList<String> results) {
-            find.setEnabled(true);
-            clear.setEnabled(true);
-
-            MainActivity.this.getFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, DisplayResultFragment.newInstance(results), TAG_RESULTS_FRAGMENT).commit();
-        }
-
-
-    }*/
 }

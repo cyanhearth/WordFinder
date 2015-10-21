@@ -8,4 +8,11 @@
         android:entryValues="@array/dictionaries"
         android:defaultValue="@string/sowpods"/>
 
+    <ListPreference
+        android:title="Minimum word length"
+        android:key="word_length"
+        android:entries="@array/word_length_entries"
+        android:entryValues="@array/word_length_values"
+        android:defaultValue="3" />
+
 </PreferenceScreen>
