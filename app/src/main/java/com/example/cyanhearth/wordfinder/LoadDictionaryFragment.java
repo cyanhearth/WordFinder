@@ -71,6 +71,7 @@ public class LoadDictionaryFragment extends Fragment {
         protected Void doInBackground(String... res) {
             words = new HashSet<>();
             int resourceId;
+            // NullPointerException sometimes occurs here on startup!!
             switch (res[0]) {
                 case "sowpods":
                     resourceId = R.raw.sowpods;

@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,6 +28,9 @@ public class MainActivity extends ActionBarActivity
     private static final String TAG_TASK_FRAGMENT = "task_fragment";
     private static final String TAG_RESULTS_FRAGMENT = "results_fragment";
     private static final String TAG_KEYBOARD_FRAGMENT = "keyboard_fragment";
+    private static final String TAG_DEBUG = "Debug";
+    private static final String DEFAULT_DICTIONARY_STRING = "sowpods";
+
     private TextView lettersInput;
     private TextView currentDict;
     private TextView minLength;
@@ -41,13 +45,15 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("Entering onCreate", TAG_DEBUG);
+
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        // preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         find = (Button)findViewById(R.id.button);
         check = (Button)findViewById(R.id.button2);
@@ -57,10 +63,10 @@ public class MainActivity extends ActionBarActivity
         currentDict = (TextView) findViewById(R.id.currentDict);
         minLength = (TextView) findViewById(R.id.minLength);
 
-        currentDict.setText(currentDict.getText().toString() + " "
+       /*currentDict.setText(currentDict.getText().toString() + " "
                 + preferences.getString(SettingsActivity.DICTIONARY_KEY, ""));
         minLength.setText(minLength.getText().toString() + " "
-                + preferences.getString(SettingsActivity.MIN_LENGTH_KEY, ""));
+                + preferences.getString(SettingsActivity.MIN_LENGTH_KEY, ""));*/
 
         // restore state
         if (savedInstanceState != null) {
@@ -89,7 +95,7 @@ public class MainActivity extends ActionBarActivity
             check.setEnabled(false);
 
             dictFragment = LoadDictionaryFragment
-                    .newInstance(preferences.getString("dictionary", "sowpods"));
+                    .newInstance(DEFAULT_DICTIONARY_STRING);
             transaction.add(dictFragment, TAG_TASK_FRAGMENT);
         }
         else {
@@ -197,14 +203,23 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     protected void onStart() {
+        Log.d("Entering onStart", TAG_DEBUG);
         super.onStart();
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        currentDict.setText(getResources().getString(R.string.current_dict) + " "
+                + preferences.getString(SettingsActivity.DICTIONARY_KEY, ""));
+        minLength.setText(getResources().getString(R.string.min_length) + " "
+                + preferences.getString(SettingsActivity.MIN_LENGTH_KEY, ""));
     }
 
     @Override
     protected void onResume() {
+        Log.d("Entering onResume", TAG_DEBUG);
         super.onResume();
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        //preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         String dict = preferences.getString(SettingsActivity.DICTIONARY_KEY, "");
 
@@ -222,7 +237,7 @@ public class MainActivity extends ActionBarActivity
             FragmentManager manager = this.getFragmentManager();
 
             LoadDictionaryFragment dictFragment = (LoadDictionaryFragment) manager.findFragmentByTag(TAG_TASK_FRAGMENT);
-            dictFragment.currentDict = dict;
+            LoadDictionaryFragment.currentDict = dict;
             dictFragment.startTask();
 
             find.setEnabled(false);
@@ -234,17 +249,20 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     protected void onPause() {
+        Log.d("Entering onPause", TAG_DEBUG);
         super.onPause();
     }
 
     @Override
     protected void onStop() {
+        Log.d("Entering onStop", TAG_DEBUG);
         super.onStop();
 
     }
 
     @Override
     protected void onDestroy() {
+        Log.d("Entering onDestroy", TAG_DEBUG);
         super.onDestroy();
     }
 

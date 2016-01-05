@@ -7,11 +7,15 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:paddingRight="15dp">
+        android:paddingEnd="5dp"
+        android:paddingStart="5dp"
+        android:paddingRight="5dp"
+        android:paddingLeft="5dp">
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:id="@+id/linearLayout2">
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -27,56 +31,52 @@
                 android:layout_weight="1"
                 android:text="@string/min_length"
                 android:id="@+id/minLength"
-                android:layout_gravity="right"
+                android:layout_gravity="end"
                 android:gravity="center_horizontal"
                 android:paddingTop="10dp" />
         </LinearLayout>
 
         <LinearLayout
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="?android:buttonBarStyle"
             android:id="@+id/linearLayout"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
-            android:layout_above="@+id/linearLayout2"
+            android:layout_centerVertical="true"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true">
+            android:layout_alignParentStart="true"
+            android:layout_alignRight="@+id/linearLayout2"
+            android:layout_alignEnd="@+id/linearLayout2"
+            android:gravity="center_horizontal">
 
             <Button
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 style="?android:buttonBarButtonStyle"
+                android:gravity="center_vertical"
                 android:text="@string/button_find"
                 android:id="@+id/button" />
 
             <Button
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 style="?android:buttonBarButtonStyle"
+                android:gravity="center_vertical"
                 android:text="@string/button_check"
                 android:id="@+id/button2" />
-        </LinearLayout>
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:layout_marginBottom="43dp"
-            android:id="@+id/linearLayout2"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true">
             <Button
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="0dp"
                 style="?android:buttonBarButtonStyle"
+                android:gravity="center_vertical"
                 android:text="@string/clear"
-                android:id="@+id/button3" />
+                android:id="@+id/button3"
+                android:layout_weight="1" />
         </LinearLayout>
 
     </RelativeLayout>
@@ -93,14 +93,13 @@
             android:id="@+id/editText"
             android:hint="@string/enter_letters"
             android:layout_marginTop="54dp"
-            android:layout_centerHorizontal="true"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:gravity="center_horizontal"
             android:layout_gravity="center_horizontal|top" />
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1.5"
             android:id="@+id/fragment_container">
 
