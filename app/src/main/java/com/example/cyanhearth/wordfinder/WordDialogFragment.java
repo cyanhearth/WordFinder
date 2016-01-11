@@ -11,14 +11,15 @@ import android.os.Bundle;
  */
 public class WordDialogFragment extends DialogFragment {
 
-    private static String word;
+    private String word;
 
-    public static WordDialogFragment newInstance(String currentWord) {
-        word = currentWord;
+    public static WordDialogFragment newInstance() {
         return new WordDialogFragment();
     }
 
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        word = getArguments().getString("word");
+
         return new AlertDialog.Builder(getActivity())
                 .setMessage(word +
                         " is in the current dictionary.\n\nWould you like to find the definition?\n"

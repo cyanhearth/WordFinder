@@ -21,26 +21,28 @@ import java.util.Comparator;
  */
 public class DisplayResultFragment extends ListFragment {
 
-    private static String letters;
+    private String letters;
     private ArrayList<String> finalResults;
 
     public interface SelectionListener {
         void onItemSelected(int position);
         void enableButtons();
+        void reset();
     }
 
     private WeakReference<SelectionListener> callbacks;
 
-    public static DisplayResultFragment newInstance(String lettersInput) {
-        letters = lettersInput;
+    public static DisplayResultFragment newInstance() {
         return new DisplayResultFragment();
     }
 
     @Override
-    public void onCreate(Bundle savedInsanceState) {
-        super.onCreate(savedInsanceState);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         setRetainInstance(true);
+
+        letters = getArguments().getString("letters");
 
         if (finalResults == null) {
             new FindWordsTask().execute(letters);
@@ -131,23 +133,32 @@ public class DisplayResultFragment extends ListFragment {
             if (minLetters == 0) {
                 minLetters = letters[0].length();
             }
-            ArrayList<String> results = possibleWords(letters[0], MainActivity.words, minLetters);
-            // sort alphabetically
-            Collections.sort(results);
-            // sort by length, longest to shortest
-            Collections.sort(results, new Comparator<String>() {
 
-                @Override
-                public int compare(String s1, String s2) {
-                    if (s1.length() > s2.length())
-                        return -1;
-                    else if (s1.length() < s2.length())
-                        return 1;
-                    else {
-                        return 0;
+            ArrayList<String> results = null;
+
+            Iterable<String> words = ((MainActivity) getActivity()).words;
+
+            if (words != null) {
+                results = possibleWords(letters[0], ((MainActivity) getActivity()).words, minLetters);
+
+                // sort alphabetically
+                Collections.sort(results);
+                // sort by length, longest to shortest
+                Collections.sort(results, new Comparator<String>() {
+
+                    @Override
+                    public int compare(String s1, String s2) {
+                        if (s1.length() > s2.length())
+                            return -1;
+                        else if (s1.length() < s2.length())
+                            return 1;
+                        else {
+                            return 0;
+                        }
                     }
-                }
-            });
+                });
+
+            }
 
             return results;
         }
@@ -155,10 +166,18 @@ public class DisplayResultFragment extends ListFragment {
         protected void onPostExecute(ArrayList<String> results) {
             finalResults = results;
 
-            setListAdapter(new ArrayAdapter<>(getActivity(),
-                    android.R.layout.simple_list_item_1, finalResults));
-            if (callbacks != null)
-                callbacks.get().enableButtons();
+            // if upon trying to restore the fragments previous state the wordlist is null, reset
+            // the app to it's starting conditions
+            if (finalResults == null) {
+                (callbacks.get()).reset();
+            }
+            else {
+                setListAdapter(new ArrayAdapter<>(getActivity(),
+                        android.R.layout.simple_list_item_1, finalResults));
+
+                if (callbacks != null)
+                    callbacks.get().enableButtons();
+            }
         }
 
     }

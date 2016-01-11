@@ -23,18 +23,29 @@ public class LoadDictionaryFragment extends Fragment {
     }
 
     private WeakReference<TaskCallbacks> callbacks;
-    public static String currentDict;
+    private String currentDict;
 
-    public static HashSet<String> words;
+    public HashSet<String> words;
 
-    public static LoadDictionaryFragment newInstance (String res) {
-        currentDict = res;
+    public static LoadDictionaryFragment newInstance () {
         return new LoadDictionaryFragment();
     }
 
     public void startTask() {
         LoadDictionaryTask task = new LoadDictionaryTask();
         task.execute(currentDict);
+    }
+
+    public String getCurrentDict() {
+        return currentDict;
+    }
+
+    public HashSet<String> getWords() {
+        return words;
+    }
+
+    public void setCurrentDict(String dict) {
+        this.currentDict = dict;
     }
 
     /**
@@ -59,6 +70,8 @@ public class LoadDictionaryFragment extends Fragment {
 
         // Retain this fragment across configuration changes.
         setRetainInstance(true);
+
+        currentDict = getArguments().getString("dict");
 
         // Create and execute the background task.
         startTask();
