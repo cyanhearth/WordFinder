@@ -6,7 +6,6 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -18,7 +17,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 public class MainActivity extends ActionBarActivity
@@ -34,8 +32,6 @@ public class MainActivity extends ActionBarActivity
     private static final String DEFAULT_DICTIONARY_STRING = "sowpods";
 
     private TextView lettersInput;
-    private TextView currentDict;
-    private TextView minLength;
     private Button find;
     private Button check;
     private Button clear;
@@ -60,15 +56,8 @@ public class MainActivity extends ActionBarActivity
         clear = (Button)findViewById(R.id.button3);
         lettersInput = (TextView)findViewById(R.id.editText);
 
-        currentDict = (TextView) findViewById(R.id.currentDict);
-        minLength = (TextView) findViewById(R.id.minLength);
-
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        currentDict.setText(getResources().getString(R.string.current_dict) + " "
-                + preferences.getString(SettingsActivity.DICTIONARY_KEY, ""));
-        minLength.setText(getResources().getString(R.string.min_length) + " "
-                + preferences.getString(SettingsActivity.MIN_LENGTH_KEY, ""));
 
         // restore state
         if (savedInstanceState != null) {
@@ -219,17 +208,7 @@ public class MainActivity extends ActionBarActivity
         Log.d("Entering onResume", TAG_DEBUG);
         super.onResume();
 
-        //preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
         String dict = preferences.getString(SettingsActivity.DICTIONARY_KEY, "");
-
-        String wordLength = preferences.getString(SettingsActivity.MIN_LENGTH_KEY, "");
-
-        if (wordLength.equals("0")) {
-            wordLength = "All letters";
-        }
-
-        minLength.setText(getResources().getText(R.string.min_length) + " " + wordLength);
 
         String currentDictString = ((LoadDictionaryFragment)
                 getFragmentManager().findFragmentByTag(TAG_TASK_FRAGMENT)).getCurrentDict();
@@ -244,8 +223,6 @@ public class MainActivity extends ActionBarActivity
 
             find.setEnabled(false);
             check.setEnabled(false);
-
-            currentDict.setText(getResources().getText(R.string.current_dict) + " " + dict);
         }
     }
 
@@ -313,8 +290,10 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void reset() {
-        getFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                KeyboardFragment.newInstance(), TAG_KEYBOARD_FRAGMENT).commit();
+        if (getFragmentManager().findFragmentByTag(TAG_KEYBOARD_FRAGMENT) == null) {
+            getFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    KeyboardFragment.newInstance(), TAG_KEYBOARD_FRAGMENT).commit();
+        }
 
         find.setEnabled(true);
         check.setEnabled(true);
@@ -334,7 +313,10 @@ public class MainActivity extends ActionBarActivity
             lettersInput.setText(inputText);
         }
         else {
-            lettersInput.setText(lettersInput.getText() + letter);
+            inputText += letter;
+            lettersInput.setText(inputText);
         }
+
+        clear.setEnabled(!inputText.equals(""));
     }
 }
