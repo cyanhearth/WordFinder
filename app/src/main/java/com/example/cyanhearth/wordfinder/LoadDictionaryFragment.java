@@ -86,11 +86,17 @@ public class LoadDictionaryFragment extends Fragment {
             int resourceId;
             // NullPointerException sometimes occurs here on startup!!
             switch (res[0]) {
-                case "sowpods":
+                case "SOWPODS":
                     resourceId = R.raw.sowpods;
                     break;
-                case "ospd":
+                case "OSPD":
                     resourceId = R.raw.ospd;
+                    break;
+                case "CSW15":
+                    resourceId = R.raw.csw15;
+                    break;
+                case "TWL3":
+                    resourceId = R.raw.twl3;
                     break;
                 default:
                     resourceId = R.raw.sowpods;
@@ -104,7 +110,7 @@ public class LoadDictionaryFragment extends Fragment {
             try {
                 String line;
                 while ((line = st.readLine()) != null) {
-                    words.add(line);
+                    words.add(line.toLowerCase());
                 }
             }
             catch (IOException e) {

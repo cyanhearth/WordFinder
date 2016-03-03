@@ -17,6 +17,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     public static final String DICTIONARY_KEY = "dictionary";
     public static final String MIN_LENGTH_KEY = "word_length";
+    public static final String WIFI_ONLY_KEY = "wifi_only";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,20 +58,32 @@ public class SettingsActivity extends PreferenceActivity {
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            String message = "";
-            if (key.equals(DICTIONARY_KEY)) {
-                message = getResources().getText(R.string.dict_changed) + " "
-                        + sharedPreferences.getString(key, "");
+            switch (key) {
+                case DICTIONARY_KEY:
+                    String message = getResources().getText(R.string.dict_changed) + " "
+                            + sharedPreferences.getString(key, "");
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                    break;
+                case MIN_LENGTH_KEY:
+                    String minLength = sharedPreferences.getString(key, "");
+                    if (minLength.equals("0")) {
+                        minLength = "Use all letters";
+                    }
+                    message = getResources().getText(R.string.length_changed) + " " + minLength;
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                    break;
+                case WIFI_ONLY_KEY:
+                    if (sharedPreferences.getBoolean(WIFI_ONLY_KEY, false)) {
+                        message = "Wifi only";
+                    }
+                    else {
+                        message = "Wifi or Data";
+                    }
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    break;
             }
-            if (key.equals(MIN_LENGTH_KEY)) {
-                String minLength = sharedPreferences.getString(key, "");
-                if (minLength.equals("0")) {
-                    minLength = "Use all letters";
-                }
-                message = getResources().getText(R.string.length_changed) + " " + minLength;
-            }
-
-            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
         }
     }
 }

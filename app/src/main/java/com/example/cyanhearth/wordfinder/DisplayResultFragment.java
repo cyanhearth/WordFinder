@@ -2,7 +2,6 @@ package com.example.cyanhearth.wordfinder;
 
 import android.app.Activity;
 import android.app.ListFragment;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -21,7 +20,7 @@ import java.util.Comparator;
  */
 public class DisplayResultFragment extends ListFragment {
 
-    private String letters;
+    private String include;
     private ArrayList<String> finalResults;
 
     public interface SelectionListener {
@@ -42,7 +41,8 @@ public class DisplayResultFragment extends ListFragment {
 
         setRetainInstance(true);
 
-        letters = getArguments().getString("letters");
+        String letters = getArguments().getString("letters");
+        include = getArguments().getString("include");
 
         if (finalResults == null) {
             new FindWordsTask().execute(letters);
@@ -80,7 +80,7 @@ public class DisplayResultFragment extends ListFragment {
 
     }
 
-    public ArrayList<String> possibleWords(String letters, Iterable<String> words, int minLength) {
+    public ArrayList<String> possibleWords(String letters, Iterable<String> words, int minLength, String substring) {
         // hold results
         ArrayList<String> results = new ArrayList<>();
 
@@ -91,6 +91,8 @@ public class DisplayResultFragment extends ListFragment {
         for (String s : words) {
             // if the word contains too many letters move onto the next one
             if (s.length() > letters.length() || s.length() < minLength) continue;
+            // if the substring is set but is not contained in this word, move on
+            if (substring != null && !s.contains(substring)) continue;
 
             // sort the characters in the word
             char[] sToChar = s.toCharArray();
@@ -101,7 +103,7 @@ public class DisplayResultFragment extends ListFragment {
             // count the letter matches made, if this equals the number of letters
             // in the word then it will be added to the result
             int count = 0;
-
+            int noOfBlanks = 0;
             // look for each of the search letters
             for (char c : lettersToChar) {
                 for (int j = n; j < sToChar.length; j++) {
@@ -112,11 +114,18 @@ public class DisplayResultFragment extends ListFragment {
                         n = j + 1;
                         break;
                     }
+
+                    if (j == sToChar.length - 1 && c == '_') {
+                        // account for wildcard
+                        noOfBlanks++;
+                    }
                 }
             }
             // if the count equals the word length
+            // and contains the substring (if it is set)
             // add it to the result
-            if (count == s.length()) results.add(s);
+            if ((s.length() >= count && s.length() <= count + noOfBlanks))
+                results.add(s);
         }
 
         return results;
@@ -126,12 +135,16 @@ public class DisplayResultFragment extends ListFragment {
     private class FindWordsTask extends AsyncTask<String, Void, ArrayList<String>> {
 
         protected ArrayList<String> doInBackground(String... letters) {
+            String allLetters = letters[0];
+            if (include != null) {
+                allLetters = allLetters + include;
+            }
             int minLetters = Integer.parseInt(PreferenceManager.
                     getDefaultSharedPreferences((MainActivity) callbacks.get())
                     .getString("word_length", "3"));
 
             if (minLetters == 0) {
-                minLetters = letters[0].length();
+                minLetters = allLetters.length();
             }
 
             ArrayList<String> results = null;
@@ -139,7 +152,8 @@ public class DisplayResultFragment extends ListFragment {
             Iterable<String> words = ((MainActivity) getActivity()).words;
 
             if (words != null) {
-                results = possibleWords(letters[0], ((MainActivity) getActivity()).words, minLetters);
+                results = possibleWords(allLetters, ((MainActivity) getActivity()).words,
+                        minLetters, include);
 
                 // sort alphabetically
                 Collections.sort(results);

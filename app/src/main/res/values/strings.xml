@@ -6,17 +6,20 @@
     <string name="enter_letters">Enter your letters…</string>
     <string name="no_data">There are no words using these letters!</string>
 
-    <string name="button_find">How many words?</string>
-    <string name="button_check">Is it there?</string>
+    <string name="button_find">Go</string>
+    <string name="button_check">Find</string>
     <string name="title_activity_display_result">Result</string>
     <string name="clear">Clear</string>
     <string name="change_dict">Change dictionary...</string>
 
-    <string name="sowpods">sowpods</string>
-    <string name="ospd">ospd</string>
+    <string name="sowpods">SOWPODS</string>
+    <string name="ospd">OSPD</string>
+    <string name="csw15">CSW15</string>
+    <string name="twl3">TWL3</string>
     <string name="current_dict">Dictionary - </string>
     <string name="min_length">Minimum length - </string>
     <string name="dict_changed">Dictionary changed - </string>
     <string name="length_changed">Minimum length changed - </string>
+    <string name="include">Include</string>
 
 </resources>

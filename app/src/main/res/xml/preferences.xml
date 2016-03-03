@@ -3,16 +3,32 @@
     <PreferenceCategory android:title="Settings"></PreferenceCategory>
     <ListPreference
         android:title="Dictionary"
+        android:summary="Choose the word list you want to search."
         android:key="dictionary"
         android:entries="@array/dictionaries"
         android:entryValues="@array/dictionaries"
-        android:defaultValue="@string/sowpods"/>
+        android:defaultValue="@string/sowpods" />
 
     <ListPreference
         android:title="Minimum word length"
+        android:summary="Choose the minimum length of the words returned in your search."
         android:key="word_length"
         android:entries="@array/word_length_entries"
         android:entryValues="@array/word_length_values"
         android:defaultValue="3" />
+
+    <ListPreference
+        android:title="Result order"
+        android:summary="Display results alphabetically, by length or base score."
+        android:key="order"
+        android:entries="@array/order_by_entries"
+        android:entryValues="@array/order_by_values"
+        android:defaultValue="1" />
+
+    <SwitchPreference
+        android:title="Wifi only"
+        android:summary="Choose whether or not to restrict fetching web definitions to wifi only."
+        android:key="wifi_only"
+        android:defaultValue="false" />
 
 </PreferenceScreen>

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="dictionaries">
-        <item>sowpods</item>
-        <item>ospd</item>
+        <item>SOWPODS</item>
+        <item>OSPD</item>
+        <item>CSW15</item>
+        <item>TWL3</item>
     </string-array>
 
     <string-array name="word_length_values">
@@ -19,5 +21,17 @@
         <item>3</item>
         <item>4</item>
         <item>5</item>
+    </string-array>
+
+    <string-array name="order_by_entries">
+        <item>Alphabetically</item>
+        <item>Length</item>
+        <item>Score</item>
+    </string-array>
+
+    <string-array name="order_by_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
     </string-array>
 </resources>
