@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="dictionaries">
+        <item>SOWPODS (International English)</item>
+        <item>OSPD (US English)</item>
+        <item>CSW15 (UK English)</item>
+        <item>TWL3 (US English)</item>
+        <item>ENABLE1</item>
+    </string-array>
+
+    <string-array name="dictionaries_values">
         <item>SOWPODS</item>
         <item>OSPD</item>
         <item>CSW15</item>
         <item>TWL3</item>
+        <item>ENABLE1</item>
     </string-array>
 
     <string-array name="word_length_values">

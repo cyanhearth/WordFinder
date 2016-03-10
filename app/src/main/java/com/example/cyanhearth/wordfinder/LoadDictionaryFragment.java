@@ -16,13 +16,7 @@ import java.util.HashSet;
  */
 public class LoadDictionaryFragment extends Fragment {
 
-    interface TaskCallbacks {
-        void onProgressUpdate(int percent);
-        void onCancelled();
-        void onPostExecute();
-    }
-
-    private WeakReference<TaskCallbacks> callbacks;
+    private WeakReference<MainActivity> callbacks;
     private String currentDict;
 
     public HashSet<String> words;
@@ -57,7 +51,7 @@ public class LoadDictionaryFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        callbacks =  new WeakReference<>((TaskCallbacks)activity);
+        callbacks =  new WeakReference<>((MainActivity)activity);
     }
 
     /**
@@ -78,13 +72,12 @@ public class LoadDictionaryFragment extends Fragment {
     }
 
 
-    private class LoadDictionaryTask extends AsyncTask<String, Void, Void> {
+    private class LoadDictionaryTask extends AsyncTask<String, Void, HashSet<String>> {
 
         @Override
-        protected Void doInBackground(String... res) {
+        protected HashSet<String> doInBackground(String... res) {
             words = new HashSet<>();
             int resourceId;
-            // NullPointerException sometimes occurs here on startup!!
             switch (res[0]) {
                 case "SOWPODS":
                     resourceId = R.raw.sowpods;
@@ -97,6 +90,9 @@ public class LoadDictionaryFragment extends Fragment {
                     break;
                 case "TWL3":
                     resourceId = R.raw.twl3;
+                    break;
+                case "ENABLE1":
+                    resourceId = R.raw.enable1;
                     break;
                 default:
                     resourceId = R.raw.sowpods;
@@ -112,17 +108,18 @@ public class LoadDictionaryFragment extends Fragment {
                 while ((line = st.readLine()) != null) {
                     words.add(line.toLowerCase());
                 }
+                st.close();
             }
             catch (IOException e) {
                 e.printStackTrace();
             }
 
-            return null;
+            return words;
         }
 
-        protected void onPostExecute(Void args) {
+        protected void onPostExecute(HashSet<String> args) {
             if (callbacks != null)
-                callbacks.get().onPostExecute();
+                callbacks.get().onPostExecute(args);
         }
     }
 }

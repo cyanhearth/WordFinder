@@ -242,7 +242,7 @@
             android:layout_weight="1"
             android:padding="2dp"
             android:id="@+id/bksp"
-            android:background="@drawable/ic_action_hardware_keyboard_backspace"
+            android:background="@drawable/ic_action_backspace"
             android:onClick="onButtonPressed">
         </Button>
     </LinearLayout>

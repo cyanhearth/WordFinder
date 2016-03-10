@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,11 +19,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by cyanhearth on 16/02/2016.
  */
 public class DisplayExpandableResultFragment extends Fragment {
+
+    private static final String STATE_HIGHLIGHT = "state_highlight";
 
     private View v;
 
@@ -39,6 +44,8 @@ public class DisplayExpandableResultFragment extends Fragment {
 
     private String currentSortBy;
 
+    private boolean currentHighlight;
+
     public static DisplayExpandableResultFragment newInstance() {
         return new DisplayExpandableResultFragment();
     }
@@ -54,6 +61,21 @@ public class DisplayExpandableResultFragment extends Fragment {
         letters = getArguments().getString("letters");
         include = getArguments().getString("include");
 
+        if (savedInstanceState == null) {
+            currentHighlight = PreferenceManager.getDefaultSharedPreferences(callbacks.get())
+                    .getBoolean("highlight", true);
+        }
+        else {
+            currentHighlight = savedInstanceState.getBoolean(STATE_HIGHLIGHT);
+        }
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putBoolean(STATE_HIGHLIGHT, currentHighlight);
+
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
@@ -98,31 +120,50 @@ public class DisplayExpandableResultFragment extends Fragment {
         super.onStart();
 
         String sortBy = PreferenceManager.getDefaultSharedPreferences(callbacks.get()).getString("order", "1");
+        boolean highlight = PreferenceManager.getDefaultSharedPreferences(callbacks.get()).getBoolean("highlight", true);
 
         if (currentSortBy  == null) {
             currentSortBy = sortBy;
         }
-        else if (!sortBy.equals(currentSortBy)) {
-            currentSortBy = sortBy;
-            groups.clear();
-            groups.addAll(sortResults(rawResults, currentSortBy));
-            adapter.notifyDataSetChanged();
+        else {
+            if (!sortBy.equals(currentSortBy) || currentHighlight != highlight) {
+                currentSortBy = sortBy;
+                currentHighlight = highlight;
+                groups.clear();
+                groups.addAll(sortResults(rawResults, currentSortBy, currentHighlight));
+                adapter.notifyDataSetChanged();
+            }
         }
     }
 
     public ArrayList<String> possibleWords(String letters, Iterable<String> words, int minLength, String substring) {
         // hold results
         ArrayList<String> results = new ArrayList<>();
+        Pattern p;
+        Matcher m = null;
 
         // sort the letters we want to make words from
         char[] lettersToChar = letters.toLowerCase().toCharArray();
         Arrays.sort(lettersToChar);
 
+
+        // if the substring is a pattern, substitute underscores for periods and initialize the matcher
+        if (substring != null && substring.contains("_")) {
+            String regex = substring.replace("_", ".");
+            p = Pattern.compile(regex);
+            m = p.matcher("");
+        }
+
         for (String s : words) {
             // if the word contains too many letters move onto the next one
             if (s.length() > letters.length() || s.length() < minLength) continue;
             // if the substring is set but is not contained in this word, move on
-            if (substring != null && !s.contains(substring)) continue;
+            if (substring != null && !s.contains(substring)) {
+
+                if (!substring.contains("_")) {
+                    continue;
+                }
+            }
 
             // sort the characters in the word
             char[] sToChar = s.toCharArray();
@@ -134,8 +175,19 @@ public class DisplayExpandableResultFragment extends Fragment {
             // in the word then it will be added to the result
             int count = 0;
             int noOfBlanks = 0;
+            char[] replacements = null;
+            int replacementCount = 0;
             // look for each of the search letters
-            for (char c : lettersToChar) {
+            for (int i = 0; i < lettersToChar.length; i++) {
+                char c = lettersToChar[i];
+                if (c == '_') {
+                    // account for wildcard
+                    noOfBlanks++;
+                    continue;
+                }
+                if (replacements == null && noOfBlanks > 0) {
+                    replacements = new char[noOfBlanks];
+                }
                 for (int j = n; j < sToChar.length; j++) {
                     // if the letter is found in the word, increment count
                     // and set n to the index we start searching for the next letter
@@ -144,20 +196,64 @@ public class DisplayExpandableResultFragment extends Fragment {
                         n = j + 1;
                         break;
                     }
+                    // keep track of 'blank' letters to highlight
+                    else if (noOfBlanks > 0 && replacementCount <  noOfBlanks) {
+                        if (replacements != null) {
+                            replacements[replacementCount] = sToChar[j];
+                        }
+                        replacementCount++;
+                    }
+                }
 
-                    if (j == sToChar.length - 1 && c == '_') {
-                        // account for wildcard
-                        noOfBlanks++;
+                // if there are any letters left in the word, add 'blanks' if required
+                if (i == lettersToChar.length - 1) {
+                    if (n < sToChar.length) {
+                        for (int j = n; j < sToChar.length; j++) {
+                            if (noOfBlanks > 0 && replacementCount < noOfBlanks) {
+                                if (replacements != null) {
+                                    replacements[replacementCount] = sToChar[j];
+                                }
+                                replacementCount++;
+                            }
+                        }
+
                     }
                 }
             }
             // if the count equals the word length
             // and contains the substring (if it is set)
             // add it to the result
-            if ((s.length() >= count && s.length() <= count + noOfBlanks))
-                results.add(s);
-        }
+            if ((s.length() >= count && s.length() <= count + noOfBlanks)) {
+                // if the pattern is set and the string does not contain it, continue
+                if (substring != null && substring.contains("_") && m != null) {
+                    m.reset(s);
+                    if (!m.find()) {
+                        continue;
+                    }
+                }
 
+                // if there are letters to be highlighted, convert them to uppercase
+                if (replacements != null) {
+                    for (char c : replacements) {
+                        int foundAt = s.indexOf(c);
+                        if (foundAt != -1) {
+                            s = s.substring(0, foundAt)
+                                    + Character.toUpperCase(s.charAt(foundAt))
+                                    + s.substring(foundAt + 1);
+                        }
+                    }
+                    // bold the highlighted letters
+                    for (int i = 0; i < s.length(); i++) {
+                        if (Character.isUpperCase(s.charAt(i))) {
+                            s = s.substring(0, i)
+                                    + "<font color='red'>" + Character.toLowerCase(s.charAt(i)) + "</font>"
+                                    + s.substring(i + 1);
+                        }
+                    }
+                }
+                results.add(s);
+            }
+        }
         return results;
 
     }
@@ -197,15 +293,26 @@ public class DisplayExpandableResultFragment extends Fragment {
                 case 'z':
                     score += 10;
                     break;
-                default:
+                case 'a':
+                case 'e':
+                case 'i':
+                case 'l':
+                case 'n':
+                case 'o':
+                case 'r':
+                case 's':
+                case 't':
+                case 'u':
                     score += 1;
+                    break;
+                default:
                     break;
             }
         }
         return score;
     }
 
-    public ArrayList<Group> sortResults(ArrayList<String> results, String sortBy) {
+    public ArrayList<Group> sortResults(ArrayList<String> results, String sortBy, boolean highlight) {
         if (results == null) {
             return null;
         }
@@ -215,22 +322,28 @@ public class DisplayExpandableResultFragment extends Fragment {
         int groupId;
 
         for (String word : results) {
-            int score = getScrabbleScore(word);
+            String strippedWord = word.replaceAll("<font color='red'>", "");
+            strippedWord = strippedWord.replaceAll("</font>", "");
+            int score = getScrabbleScore(strippedWord);
             switch (sortBy) {
                 case "0":
-                    groupId = word.charAt(0);
+                    groupId = strippedWord.charAt(0);
                     break;
                 case "1":
-                    groupId = word.length();
+                    groupId = strippedWord.length();
                     break;
                 case "2":
                     groupId = score;
                     break;
                 default:
-                    groupId = word.length();
+                    groupId = strippedWord.length();
                     Toast.makeText(callbacks.get(),
                             "Error retrieving order setting: using default setting (by length).",
                             Toast.LENGTH_SHORT).show();
+            }
+
+            if (!highlight) {
+                word = strippedWord;
             }
 
             boolean groupExists = false;
@@ -277,11 +390,9 @@ public class DisplayExpandableResultFragment extends Fragment {
 
                     if (groupIdLeft > groupIdRight) {
                         return -1;
-                    }
-                    else if (groupIdLeft < groupIdRight) {
+                    } else if (groupIdLeft < groupIdRight) {
                         return 1;
-                    }
-                    else {
+                    } else {
                         return 0;
                     }
                 }
@@ -301,7 +412,10 @@ public class DisplayExpandableResultFragment extends Fragment {
         protected ArrayList<String> doInBackground(String... letters) {
             String allLetters = letters[0];
             if (include != null) {
-                allLetters = allLetters + include;
+                String lettersToAdd = include.replace("_", "");
+                Log.d("ADD", lettersToAdd);
+                Log.d("INCLUDE", include);
+                allLetters = allLetters + lettersToAdd;
             }
             int minLetters = Integer.parseInt(PreferenceManager.
                     getDefaultSharedPreferences(callbacks.get())
@@ -332,7 +446,7 @@ public class DisplayExpandableResultFragment extends Fragment {
                 String orderBy = prefs.getString("order", "1");
 
                 rawResults = results;
-                groups.addAll(sortResults(results, orderBy));
+                groups.addAll(sortResults(results, orderBy, currentHighlight));
             }
 
             // if upon trying to restore the fragments previous state the wordlist is null, reset

@@ -1,6 +1,5 @@
 package com.example.cyanhearth.wordfinder;
 
-import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -19,7 +18,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,7 +25,7 @@ import android.widget.Toast;
 import java.util.HashSet;
 
 public class MainActivity extends ActionBarActivity
-        implements LoadDictionaryFragment.TaskCallbacks, DisplayResultFragment.SelectionListener{
+        implements DisplayResultFragment.SelectionListener{
     private static final String BASE_URI = "https://en.wiktionary.org/wiki/";
     private static final String CHOOSER_TEXT = "Open with...";
     private static final String STATE_LETTERS = "state_letters";
@@ -46,8 +44,8 @@ public class MainActivity extends ActionBarActivity
 
     private TextView includeTextView;
     private TextView lettersInput;
-    private Button find;
-    private Button check;
+    private Button search;
+    private Button define;
     private Button clear;
     private Button include;
 
@@ -69,8 +67,8 @@ public class MainActivity extends ActionBarActivity
 
         includeWord = null;
 
-        find = (Button)findViewById(R.id.button);
-        check = (Button)findViewById(R.id.button2);
+        search = (Button)findViewById(R.id.button);
+        define = (Button)findViewById(R.id.button2);
         clear = (Button)findViewById(R.id.button3);
         include = (Button)findViewById(R.id.button4);
         lettersInput = (TextView)findViewById(R.id.editText);
@@ -93,7 +91,7 @@ public class MainActivity extends ActionBarActivity
         // Install the key handler
         keyboardView.setOnKeyboardActionListener(new KeyboardView.OnKeyboardActionListener() {
             @Override public void onKey(int primaryCode, int[] keyCodes) {
-                //Here check the primaryCode to see which key is pressed
+                //Here find the primaryCode to see which key is pressed
                 //based on the android:codes property
                 String inputText = lettersInput.getText().toString();
                 if (primaryCode == -1 && !inputText.equals("")) {
@@ -157,14 +155,14 @@ public class MainActivity extends ActionBarActivity
         }
         else {
             include.setEnabled(false);
-            find.setEnabled(false);
+            search.setEnabled(false);
         }
 
         // If the Fragment is non-null, then it is currently being
         // retained across a configuration change.
         if (dictFragment == null) {
-            find.setEnabled(false);
-            check.setEnabled(false);
+            search.setEnabled(false);
+            define.setEnabled(false);
 
             dictFragment = LoadDictionaryFragment
                     .newInstance();
@@ -180,20 +178,26 @@ public class MainActivity extends ActionBarActivity
         transaction.commit();
 
 
-        // set "Go" button function
-        find.setOnClickListener(new View.OnClickListener() {
+        // set "Search" button function
+        search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String letters = lettersInput.getText().toString();
-                if (letters.equals("")) {
+                if (letters.equals("") && (includeWord == null || !includeWord.contains("_"))) {
                     Toast.makeText(MainActivity.this, "Please enter some letters!",
                             Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    find.setEnabled(false);
+                } else {
+                    search.setEnabled(false);
                     include.setEnabled(false);
                     DisplayExpandableResultFragment fragment = DisplayExpandableResultFragment.newInstance();
                     Bundle args = new Bundle();
+                    if (letters.equals("")) {
+                        for (int i = 0; i < includeWord.length(); i++) {
+                            if (includeWord.charAt(i) == '_') {
+                                letters += "_";
+                            }
+                        }
+                    }
                     args.putString("letters", letters);
                     args.putString("include", includeWord);
                     fragment.setArguments(args);
@@ -208,14 +212,14 @@ public class MainActivity extends ActionBarActivity
             }
         });
 
-        // set "Find" button function
-        check.setOnClickListener(new View.OnClickListener() {
+        // set "Define" button function
+        define.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 String currentWord = lettersInput.getText().toString();
                 if (isValidWord(currentWord)) {
-                    ConnectivityManager conn =  (ConnectivityManager)
+                    ConnectivityManager conn = (ConnectivityManager)
                             getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
                     NetworkInfo networkInfo = conn.getActiveNetworkInfo();
 
@@ -226,18 +230,15 @@ public class MainActivity extends ActionBarActivity
                         args.putString("word", currentWord);
                         frag.setArguments(args);
                         frag.show(getFragmentManager(), "dialog");
-                    }
-                    else {
+                    } else {
                         Toast.makeText(getApplicationContext(), "Cannot retrieve definitions: no network connection.",
                                 Toast.LENGTH_LONG).show();
                     }
 
-                }
-                else if (!currentWord.equals("")){
+                } else if (!currentWord.equals("")) {
                     Toast.makeText(getApplicationContext(), currentWord +
                             " is not in the current dictionary", Toast.LENGTH_LONG).show();
-                }
-                else {
+                } else {
                     Toast.makeText(getApplicationContext(), "Please enter a word first!",
                             Toast.LENGTH_SHORT).show();
                 }
@@ -260,17 +261,18 @@ public class MainActivity extends ActionBarActivity
             public void onClick(View v) {
                 String currentWord = lettersInput.getText().toString();
 
-                if (isValidWord(currentWord)) {
-                    includeWord = currentWord;
+                includeWord = currentWord;
 
-                    includeTextView.setText("Including word \"" + includeWord + "\"");
+                if (includeWord.length() > 0) {
+                    String text = String.format(
+                            getResources().getString(R.string.include_message), includeWord);
+                    includeTextView.setText(text);
                     lettersInput.setText("");
                     include.setEnabled(false);
-
                 }
 
                 else {
-                    Toast.makeText(getApplicationContext(), "Cannot include an invalid word!",
+                    Toast.makeText(getApplicationContext(), "Please provide a word/pattern to include in your search.",
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -341,8 +343,8 @@ public class MainActivity extends ActionBarActivity
             dictFragment.setCurrentDict(dict);
             dictFragment.startTask();
 
-            find.setEnabled(false);
-            check.setEnabled(false);
+            search.setEnabled(false);
+            define.setEnabled(false);
         }
 
     }
@@ -377,23 +379,13 @@ public class MainActivity extends ActionBarActivity
         return words.contains(word.toLowerCase());
     }
 
-    // LoadDictionaryFragment.TaskCallbacks methods
-    @Override
-    public void onProgressUpdate(int percent) {
+    // LoadDictionaryFragment onPostExecute callback
 
-    }
+    public void onPostExecute(HashSet<String> words) {
 
-    @Override
-    public void onCancelled() {
-
-    }
-
-    @Override
-    public void onPostExecute() {
-
-        words = ((LoadDictionaryFragment) getFragmentManager().findFragmentByTag(TAG_TASK_FRAGMENT)).getWords();
-        find.setEnabled(true);
-        check.setEnabled(true);
+        this.words = words;
+        search.setEnabled(true);
+        define.setEnabled(true);
     }
 
     // DisplayResultFragment.SelectionListener methods
@@ -427,7 +419,7 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void enableButtons() {
-        check.setEnabled(true);
+        define.setEnabled(true);
         clear.setEnabled(true);
     }
 
@@ -443,8 +435,8 @@ public class MainActivity extends ActionBarActivity
             getFragmentManager().beginTransaction().remove(fragment).commit();
         }
 
-        find.setEnabled(true);
-        check.setEnabled(true);
+        search.setEnabled(true);
+        define.setEnabled(true);
         clear.setEnabled(false);
         include.setEnabled(false);
 

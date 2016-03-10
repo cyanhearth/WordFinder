@@ -6,7 +6,7 @@
         android:summary="Choose the word list you want to search."
         android:key="dictionary"
         android:entries="@array/dictionaries"
-        android:entryValues="@array/dictionaries"
+        android:entryValues="@array/dictionaries_values"
         android:defaultValue="@string/sowpods" />
 
     <ListPreference
@@ -24,6 +24,12 @@
         android:entries="@array/order_by_entries"
         android:entryValues="@array/order_by_values"
         android:defaultValue="1" />
+
+    <SwitchPreference
+        android:title="Highlighting"
+        android:summary="Toggle highlighting of results returned from 'blank' letters."
+        android:key="highlight"
+        android:defaultValue="true" />
 
     <SwitchPreference
         android:title="Wifi only"

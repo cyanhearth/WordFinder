@@ -1,6 +1,7 @@
 package com.example.cyanhearth.wordfinder;
 
 import android.content.Context;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -99,7 +100,7 @@ public class DisplayExpandableResultAdapter extends BaseExpandableListAdapter {
 
         // update the child item view
         Child child = getChild(groupPosition,childPosition);
-        childHolder.childTextView.setText(child.getChildName());
+        childHolder.childTextView.setText(Html.fromHtml(child.getChildName()));
 
         String score = String.valueOf(child.getChildScore());
 

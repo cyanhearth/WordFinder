@@ -22,7 +22,6 @@
             android:paddingTop="30dp"
             android:paddingBottom="30dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            style="?android:buttonBarButtonStyle"
             android:gravity="center_horizontal"
             android:layout_gravity="center_horizontal|top"
             android:textSize="30sp" />
@@ -74,7 +73,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             style="?android:buttonBarButtonStyle"
-            android:text="@string/button_find"
+            android:text="@string/button_search"
             android:id="@+id/button" />
 
         <Button
@@ -82,7 +81,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             style="?android:buttonBarButtonStyle"
-            android:text="@string/button_check"
+            android:text="@string/button_define"
             android:id="@+id/button2" />
 
         <Button
