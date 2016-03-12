@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class MainActivity extends ActionBarActivity
@@ -49,7 +50,6 @@ public class MainActivity extends ActionBarActivity
     private Button clear;
     private Button include;
 
-    private Keyboard keyboard;
     private KeyboardView keyboardView;
 
     // holds all of the dictionary words
@@ -78,7 +78,7 @@ public class MainActivity extends ActionBarActivity
 
         // set up keyboard
         // Create the Keyboard
-        keyboard = new Keyboard(this,R.xml.keyboard);
+        Keyboard keyboard = new Keyboard(this, R.xml.keyboard);
 
         // Lookup the KeyboardView
         keyboardView = (KeyboardView)findViewById(R.id.keyboardview);
@@ -150,14 +150,11 @@ public class MainActivity extends ActionBarActivity
                 (LoadDictionaryFragment) manager.findFragmentByTag(TAG_TASK_FRAGMENT);
         FragmentTransaction transaction = manager.beginTransaction();
 
-        if (manager.findFragmentByTag(TAG_RESULTS_FRAGMENT) == null) {
+        if (manager.findFragmentByTag(TAG_RESULTS_FRAGMENT) != null) {
             //transaction.replace(R.id.fragment_container, KeyboardFragment.newInstance(), TAG_KEYBOARD_FRAGMENT);
-        }
-        else {
             include.setEnabled(false);
             search.setEnabled(false);
         }
-
         // If the Fragment is non-null, then it is currently being
         // retained across a configuration change.
         if (dictFragment == null) {
@@ -409,6 +406,8 @@ public class MainActivity extends ActionBarActivity
 
         if (wifiOnly && networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI
                 || !wifiOnly && networkInfo != null) {
+            word = word.replace("<font color='red'>", "");
+            word = word.replace("</font>", "");
             sendIntentForDefinition(word);
         }
         else {

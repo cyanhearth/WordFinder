@@ -188,12 +188,31 @@ public class DisplayExpandableResultFragment extends Fragment {
                 if (replacements == null && noOfBlanks > 0) {
                     replacements = new char[noOfBlanks];
                 }
+                if (n == sToChar.length) {
+                    if (replacements != null) {
+                        for (int k = 0; k < replacements.length; k++) {
+                            if (c != replacements[k]) {
+                                replacementCount++;
+                            }
+                        }
+                    }
+                }
                 for (int j = n; j < sToChar.length; j++) {
                     // if the letter is found in the word, increment count
                     // and set n to the index we start searching for the next letter
                     if (c == sToChar[j]) {
                         count++;
                         n = j + 1;
+
+                        if (replacements != null) {
+                            for (int k = 0; k < replacements.length; k++) {
+                                if (c == replacements[k]) {
+                                    if (replacementCount > 0)
+                                        replacementCount--;
+                                }
+                            }
+                        }
+
                         break;
                     }
                     // keep track of 'blank' letters to highlight
@@ -202,6 +221,7 @@ public class DisplayExpandableResultFragment extends Fragment {
                             replacements[replacementCount] = sToChar[j];
                         }
                         replacementCount++;
+                        n = j + 1;
                     }
                 }
 
@@ -233,7 +253,7 @@ public class DisplayExpandableResultFragment extends Fragment {
                 }
 
                 // if there are letters to be highlighted, convert them to uppercase
-                if (replacements != null) {
+                if (replacements != null && replacementCount > 0) {
                     for (char c : replacements) {
                         int foundAt = s.indexOf(c);
                         if (foundAt != -1) {
@@ -242,7 +262,7 @@ public class DisplayExpandableResultFragment extends Fragment {
                                     + s.substring(foundAt + 1);
                         }
                     }
-                    // bold the highlighted letters
+                    // highlight the letters
                     for (int i = 0; i < s.length(); i++) {
                         if (Character.isUpperCase(s.charAt(i))) {
                             s = s.substring(0, i)
@@ -322,8 +342,8 @@ public class DisplayExpandableResultFragment extends Fragment {
         int groupId;
 
         for (String word : results) {
-            String strippedWord = word.replaceAll("<font color='red'>", "");
-            strippedWord = strippedWord.replaceAll("</font>", "");
+            String strippedWord = word.replace("<font color='red'>", "");
+            strippedWord = strippedWord.replace("</font>", "");
             int score = getScrabbleScore(strippedWord);
             switch (sortBy) {
                 case "0":
@@ -434,7 +454,29 @@ public class DisplayExpandableResultFragment extends Fragment {
                         minLetters, include);
 
                 // sort alphabetically
-                Collections.sort(results);
+                Collections.sort(results, new Comparator<String>() {
+
+                    @Override
+                    public int compare(String lhs, String rhs) {
+                        String strippedLeft = lhs.replace("<font color='red'>", "");
+                        strippedLeft = strippedLeft.replace("</font>", "");
+
+                        String strippedRight = rhs.replace("<font color='red'>", "");
+                        strippedRight = strippedRight.replace("</font>", "");
+
+                        int compare = strippedLeft.compareTo(strippedRight);
+
+                        if (compare < 0) {
+                            return -1;
+                        }
+                        else if (compare > 0) {
+                            return 1;
+                        }
+                        else {
+                            return 0;
+                        }
+                    }
+                });
             }
 
             return results;
