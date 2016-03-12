@@ -146,7 +146,6 @@ public class DisplayExpandableResultFragment extends Fragment {
         char[] lettersToChar = letters.toLowerCase().toCharArray();
         Arrays.sort(lettersToChar);
 
-
         // if the substring is a pattern, substitute underscores for periods and initialize the matcher
         if (substring != null && substring.contains("_")) {
             String regex = substring.replace("_", ".");
@@ -159,7 +158,6 @@ public class DisplayExpandableResultFragment extends Fragment {
             if (s.length() > letters.length() || s.length() < minLength) continue;
             // if the substring is set but is not contained in this word, move on
             if (substring != null && !s.contains(substring)) {
-
                 if (!substring.contains("_")) {
                     continue;
                 }
@@ -175,8 +173,7 @@ public class DisplayExpandableResultFragment extends Fragment {
             // in the word then it will be added to the result
             int count = 0;
             int noOfBlanks = 0;
-            char[] replacements = null;
-            int replacementCount = 0;
+
             // look for each of the search letters
             for (int i = 0; i < lettersToChar.length; i++) {
                 char c = lettersToChar[i];
@@ -185,61 +182,18 @@ public class DisplayExpandableResultFragment extends Fragment {
                     noOfBlanks++;
                     continue;
                 }
-                if (replacements == null && noOfBlanks > 0) {
-                    replacements = new char[noOfBlanks];
-                }
-                if (n == sToChar.length) {
-                    if (replacements != null) {
-                        for (int k = 0; k < replacements.length; k++) {
-                            if (c != replacements[k]) {
-                                replacementCount++;
-                            }
-                        }
-                    }
-                }
+
                 for (int j = n; j < sToChar.length; j++) {
                     // if the letter is found in the word, increment count
                     // and set n to the index we start searching for the next letter
                     if (c == sToChar[j]) {
                         count++;
                         n = j + 1;
-
-                        if (replacements != null) {
-                            for (int k = 0; k < replacements.length; k++) {
-                                if (c == replacements[k]) {
-                                    if (replacementCount > 0)
-                                        replacementCount--;
-                                }
-                            }
-                        }
-
                         break;
-                    }
-                    // keep track of 'blank' letters to highlight
-                    else if (noOfBlanks > 0 && replacementCount <  noOfBlanks) {
-                        if (replacements != null) {
-                            replacements[replacementCount] = sToChar[j];
-                        }
-                        replacementCount++;
-                        n = j + 1;
-                    }
-                }
-
-                // if there are any letters left in the word, add 'blanks' if required
-                if (i == lettersToChar.length - 1) {
-                    if (n < sToChar.length) {
-                        for (int j = n; j < sToChar.length; j++) {
-                            if (noOfBlanks > 0 && replacementCount < noOfBlanks) {
-                                if (replacements != null) {
-                                    replacements[replacementCount] = sToChar[j];
-                                }
-                                replacementCount++;
-                            }
-                        }
-
                     }
                 }
             }
+
             // if the count equals the word length
             // and contains the substring (if it is set)
             // add it to the result
@@ -252,15 +206,49 @@ public class DisplayExpandableResultFragment extends Fragment {
                     }
                 }
 
-                // if there are letters to be highlighted, convert them to uppercase
-                if (replacements != null && replacementCount > 0) {
-                    for (char c : replacements) {
-                        int foundAt = s.indexOf(c);
-                        if (foundAt != -1) {
-                            s = s.substring(0, foundAt)
-                                    + Character.toUpperCase(s.charAt(foundAt))
-                                    + s.substring(foundAt + 1);
+                if (noOfBlanks > 0) {
+                    char lastChar = ' ';
+                    for (char c : sToChar) {
+                        int noInLetters = 0;
+                        int noInWord = 0;
+
+                        if (c == lastChar) continue;
+                        // count the occurrences of each letter in the entered letters
+                        for (int j = 0; j < lettersToChar.length; j++) {
+                            if (lettersToChar[j] == c) {
+                                noInLetters++;
+                            }
                         }
+                        // count the occurrences of each letter in the word
+                        for (int j = 0; j < sToChar.length; j++) {
+                            if (sToChar[j] == c) {
+                                noInWord++;
+                            }
+                        }
+                        // compare the occurrences in each
+                        if (noInWord > noInLetters) {
+                            int repeat = noInWord - noInLetters;
+
+                            for (int i = 0; i < repeat; i++) {
+
+                                if (s.lastIndexOf(Character.toUpperCase(c)) != -1) {
+                                    String front = s.substring(0, s.lastIndexOf(Character.toUpperCase(c)));
+                                    String back = s.substring(s.lastIndexOf(Character.toUpperCase(c)));
+                                    StringBuilder b = new StringBuilder(front);
+                                    b.replace(front.lastIndexOf(c), front.lastIndexOf(c) + 1,
+                                            String.valueOf(Character.toUpperCase(c)));
+                                    front = b.toString();
+
+                                    s = front + back;
+                                } else {
+                                    StringBuilder b = new StringBuilder(s);
+                                    b.replace(s.lastIndexOf(c), s.lastIndexOf(c) + 1,
+                                            String.valueOf(Character.toUpperCase(c)));
+                                    s = b.toString();
+                                }
+                            }
+                        }
+                        lastChar = c;
                     }
                     // highlight the letters
                     for (int i = 0; i < s.length(); i++) {
@@ -273,9 +261,9 @@ public class DisplayExpandableResultFragment extends Fragment {
                 }
                 results.add(s);
             }
+
         }
         return results;
-
     }
 
     public int getScrabbleScore(String word) {
