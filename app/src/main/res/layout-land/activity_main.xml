@@ -3,7 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity"
     android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:baselineAligned="false">
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin" >
 
     <LinearLayout
         android:orientation="vertical"
@@ -19,9 +22,9 @@
             android:layout_height="wrap_content"
             android:id="@+id/editText"
             android:hint="@string/enter_letters"
-            android:paddingTop="30dp"
-            android:paddingBottom="30dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
+            android:paddingTop="10dp"
+            android:layout_marginBottom="10dp"
             android:gravity="center_horizontal"
             android:layout_gravity="center_horizontal|top"
             android:textSize="30sp" />
@@ -31,8 +34,8 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:id="@+id/textView"
+            android:layout_marginBottom="10dp"
             android:layout_gravity="center_horizontal"
-            android:paddingBottom="10dp"
             android:clickable="false"/>
 
         <FrameLayout
@@ -42,12 +45,14 @@
 
             <android.inputmethodservice.KeyboardView
                 android:id="@+id/keyboardview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom|center_horizontal"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:visibility="visible"
-                android:background="#00000000" />
+                android:keyBackground="@drawable/keybackground"
+                android:background="#fff3f3f3"
+                android:visibility="visible" />
 
         </FrameLayout>
 
@@ -57,22 +62,20 @@
         android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        style="?android:buttonBarStyle"
         android:id="@+id/buttonLayout"
-        android:paddingTop="30dp"
-        android:paddingBottom="30dp"
         android:paddingLeft="30dp"
         android:paddingRight="30dp"
         android:gravity="fill_horizontal"
-        android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true">
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentBottom="true">
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
-            style="?android:buttonBarButtonStyle"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="@color/primary_light"
             android:text="@string/button_search"
             android:id="@+id/button" />
 
@@ -80,24 +83,27 @@
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
-            style="?android:buttonBarButtonStyle"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="@color/primary_light"
             android:text="@string/button_define"
             android:id="@+id/button2" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            style="?android:buttonBarButtonStyle"
-            android:text="@string/clear"
-            android:id="@+id/button3"
+            android:text="@string/include"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="@color/primary_light"
+            android:id="@+id/button4"
             android:layout_weight="1" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            style="?android:buttonBarButtonStyle"
-            android:text="@string/include"
-            android:id="@+id/button4"
+            android:text="@string/clear"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="@color/primary_light"
+            android:id="@+id/button3"
             android:layout_weight="1" />
 
     </LinearLayout>

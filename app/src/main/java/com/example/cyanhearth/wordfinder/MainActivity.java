@@ -21,16 +21,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.ArrayList;
 import java.util.HashSet;
 
-public class MainActivity extends ActionBarActivity
-        implements DisplayResultFragment.SelectionListener{
+public class MainActivity extends ActionBarActivity {
     private static final String BASE_URI = "https://en.wiktionary.org/wiki/";
     private static final String CHOOSER_TEXT = "Open with...";
     private static final String STATE_LETTERS = "state_letters";
     private static final String STATE_INCLUDE = "state_include";
+    private static final String STATE_INCLUDE_WORD = "state_include_word";
 
     private static final String TAG_TASK_FRAGMENT = "task_fragment";
     private static final String TAG_RESULTS_FRAGMENT = "results_fragment";
@@ -57,7 +55,6 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("Entering onCreate", TAG_DEBUG);
 
         super.onCreate(savedInstanceState);
 
@@ -102,9 +99,6 @@ public class MainActivity extends ActionBarActivity
                     inputText += String.valueOf((char)primaryCode);
                     lettersInput.setText(inputText);
                 }
-
-                clear.setEnabled(!inputText.equals(""));
-                include.setEnabled(!inputText.equals(""));
             }
 
             @Override public void onPress(int arg0) {
@@ -134,15 +128,11 @@ public class MainActivity extends ActionBarActivity
         if (savedInstanceState != null) {
             lettersInput.setText(savedInstanceState.getString(STATE_LETTERS));
             includeTextView.setText(savedInstanceState.getString(STATE_INCLUDE));
+            includeWord = savedInstanceState.getString(STATE_INCLUDE_WORD);
 
             if (manager.findFragmentByTag(TAG_RESULTS_FRAGMENT) != null) {
                 keyboardView.setVisibility(View.GONE);
             }
-        }
-
-        if (lettersInput.getText().toString().equals("")) {
-            clear.setEnabled(false);
-            include.setEnabled(false);
         }
 
         // set up fragments
@@ -150,17 +140,9 @@ public class MainActivity extends ActionBarActivity
                 (LoadDictionaryFragment) manager.findFragmentByTag(TAG_TASK_FRAGMENT);
         FragmentTransaction transaction = manager.beginTransaction();
 
-        if (manager.findFragmentByTag(TAG_RESULTS_FRAGMENT) != null) {
-            //transaction.replace(R.id.fragment_container, KeyboardFragment.newInstance(), TAG_KEYBOARD_FRAGMENT);
-            include.setEnabled(false);
-            search.setEnabled(false);
-        }
         // If the Fragment is non-null, then it is currently being
         // retained across a configuration change.
         if (dictFragment == null) {
-            search.setEnabled(false);
-            define.setEnabled(false);
-
             dictFragment = LoadDictionaryFragment
                     .newInstance();
             Bundle args = new Bundle();
@@ -183,9 +165,12 @@ public class MainActivity extends ActionBarActivity
                 if (letters.equals("") && (includeWord == null || !includeWord.contains("_"))) {
                     Toast.makeText(MainActivity.this, "Please enter some letters!",
                             Toast.LENGTH_SHORT).show();
-                } else {
-                    search.setEnabled(false);
-                    include.setEnabled(false);
+                }
+                else if (letters.length() - letters.replace("_", "").length() > 2){
+                    Toast.makeText(MainActivity.this, "No more than 2 wild cards can be used in a search!",
+                            Toast.LENGTH_SHORT).show();
+                }
+                else {
                     DisplayExpandableResultFragment fragment = DisplayExpandableResultFragment.newInstance();
                     Bundle args = new Bundle();
                     if (letters.equals("")) {
@@ -256,16 +241,14 @@ public class MainActivity extends ActionBarActivity
 ;
             @Override
             public void onClick(View v) {
-                String currentWord = lettersInput.getText().toString();
 
-                includeWord = currentWord;
+                includeWord = lettersInput.getText().toString();
 
                 if (includeWord.length() > 0) {
                     String text = String.format(
                             getResources().getString(R.string.include_message), includeWord);
                     includeTextView.setText(text);
                     lettersInput.setText("");
-                    include.setEnabled(false);
                 }
 
                 else {
@@ -290,6 +273,7 @@ public class MainActivity extends ActionBarActivity
         // save the letters previously entered by the user
         savedInstanceState.putString(STATE_LETTERS, lettersInput.getText().toString());
         savedInstanceState.putString(STATE_INCLUDE, includeTextView.getText().toString());
+        savedInstanceState.putString(STATE_INCLUDE_WORD, includeWord);
 
         super.onSaveInstanceState(savedInstanceState);
     }
@@ -320,7 +304,6 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     protected void onStart() {
-        Log.d("Entering onStart", TAG_DEBUG);
         super.onStart();
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -339,35 +322,28 @@ public class MainActivity extends ActionBarActivity
             LoadDictionaryFragment dictFragment = (LoadDictionaryFragment) manager.findFragmentByTag(TAG_TASK_FRAGMENT);
             dictFragment.setCurrentDict(dict);
             dictFragment.startTask();
-
-            search.setEnabled(false);
-            define.setEnabled(false);
         }
 
     }
 
     @Override
     protected void onResume() {
-        Log.d("Entering onResume", TAG_DEBUG);
         super.onResume();
     }
 
     @Override
     protected void onPause() {
-        Log.d("Entering onPause", TAG_DEBUG);
         super.onPause();
     }
 
     @Override
     protected void onStop() {
-        Log.d("Entering onStop", TAG_DEBUG);
         super.onStop();
 
     }
 
     @Override
     protected void onDestroy() {
-        Log.d("Entering onDestroy", TAG_DEBUG);
         super.onDestroy();
     }
 
@@ -381,22 +357,6 @@ public class MainActivity extends ActionBarActivity
     public void onPostExecute(HashSet<String> words) {
 
         this.words = words;
-        search.setEnabled(true);
-        define.setEnabled(true);
-    }
-
-    // DisplayResultFragment.SelectionListener methods
-    // dispatch intent to retrieve word definition when a word is selected
-    // from the list
-    @Override
-    public void onItemSelected(int position) {
-
-        DisplayResultFragment frag = (DisplayResultFragment)(getFragmentManager()
-                .findFragmentByTag(TAG_RESULTS_FRAGMENT));
-
-        if (frag != null)
-            sendIntentForDefinition(frag.getListAdapter().getItem(position).toString());
-
     }
 
     public void onExpandableItemSelected(String word) {
@@ -416,13 +376,6 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    @Override
-    public void enableButtons() {
-        define.setEnabled(true);
-        clear.setEnabled(true);
-    }
-
-    @Override
     public void reset() {
         //if (getFragmentManager().findFragmentByTag(TAG_KEYBOARD_FRAGMENT) == null) {
         //    getFragmentManager().beginTransaction().replace(R.id.fragment_container,
@@ -433,11 +386,6 @@ public class MainActivity extends ActionBarActivity
         if (fragment != null) {
             getFragmentManager().beginTransaction().remove(fragment).commit();
         }
-
-        search.setEnabled(true);
-        define.setEnabled(true);
-        clear.setEnabled(false);
-        include.setEnabled(false);
 
         keyboardView.setVisibility(View.VISIBLE);
 
@@ -461,8 +409,5 @@ public class MainActivity extends ActionBarActivity
             inputText += letter;
             lettersInput.setText(inputText);
         }
-
-        clear.setEnabled(!inputText.equals(""));
-        include.setEnabled(!inputText.equals(""));
     }
 }

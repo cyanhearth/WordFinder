@@ -25,7 +25,7 @@ public class DisplayResultFragment extends ListFragment {
 
     public interface SelectionListener {
         void onItemSelected(int position);
-        void enableButtons();
+
         void reset();
     }
 
@@ -184,15 +184,11 @@ public class DisplayResultFragment extends ListFragment {
             // the app to it's starting conditions
             if (finalResults == null) {
                 (callbacks.get()).reset();
-            }
-            else {
+            } else {
                 setListAdapter(new ArrayAdapter<>(getActivity(),
                         android.R.layout.simple_list_item_1, finalResults));
-
-                if (callbacks != null)
-                    callbacks.get().enableButtons();
             }
-        }
 
+        }
     }
 }

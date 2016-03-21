@@ -10,7 +10,8 @@
         android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:paddingTop="10dp"
-        android:paddingBottom="10dp" />
+        android:paddingBottom="10dp"
+        android:textColor="#000000"/>
 
     <TextView
         android:id="@+id/childScoreView"
@@ -20,6 +21,7 @@
         android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:paddingTop="10dp"
-        android:paddingBottom="10dp" />
+        android:paddingBottom="10dp"
+        android:textColor="#000000"/>
 
 </LinearLayout>

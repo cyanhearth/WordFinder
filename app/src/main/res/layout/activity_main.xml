@@ -22,53 +22,77 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/buttonLayout"
+        android:id="@+id/buttonLayoutRow1"
         android:layout_below="@+id/editText"
         android:layout_centerHorizontal="true"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp">
+        android:paddingTop="20dp">
 
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            style="?android:attr/borderlessButtonStyle"
             android:text="@string/button_search"
+            android:backgroundTint="@color/primary_light"
+            android:textColor="#FFFFFF"
             android:id="@+id/button" />
 
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            style="?android:borderlessButtonStyle"
             android:text="@string/button_define"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="@color/primary_light"
             android:id="@+id/button2" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonLayoutRow2"
+        android:layout_below="@+id/buttonLayoutRow1"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="@string/include"
+            android:id="@+id/button4"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="@color/primary_light"
+            android:layout_weight="1" />
 
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            style="?android:borderlessButtonStyle"
             android:text="@string/clear"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="@color/primary_light"
             android:id="@+id/button3" />
-
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            style="?android:borderlessButtonStyle"
-            android:text="@string/include"
-            android:id="@+id/button4"
-            android:layout_weight="1" />
     </LinearLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/buttonLayout"
+        android:layout_below="@+id/buttonLayoutRow2"
         android:id="@+id/fragment_container"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
 
+        <android.inputmethodservice.KeyboardView
+            android:id="@+id/keyboardview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:keyBackground="@drawable/keybackground"
+            android:background="#fff3f3f3"
+            android:visibility="visible" />
     </FrameLayout>
 
     <TextView
@@ -76,19 +100,8 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:id="@+id/textView"
-        android:layout_above="@+id/buttonLayout"
+        android:layout_above="@+id/buttonLayoutRow1"
         android:layout_centerHorizontal="true" />
-
-    <android.inputmethodservice.KeyboardView
-        android:id="@+id/keyboardview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:visibility="visible"
-        android:background="#00000000" />
 
 
 </RelativeLayout>

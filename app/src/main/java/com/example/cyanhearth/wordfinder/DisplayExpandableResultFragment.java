@@ -5,12 +5,19 @@ import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,10 +38,14 @@ public class DisplayExpandableResultFragment extends Fragment {
 
     private View v;
 
+    private ProgressBar pb;
+
     private ArrayList<String> rawResults;
     private ArrayList<Group> groups;
     private String include;
     private String letters;
+
+    private AsyncTask<String, Void, ArrayList<Group>> findWordsTask;
 
     private ExpandableListView lv;
 
@@ -110,9 +121,10 @@ public class DisplayExpandableResultFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if(rawResults == null)
-            new FindWordsTask().execute(letters);
-
+        if(rawResults == null) {
+            findWordsTask = new FindWordsTask();
+            findWordsTask.execute(letters);
+        }
     }
 
     @Override
@@ -126,39 +138,66 @@ public class DisplayExpandableResultFragment extends Fragment {
             currentSortBy = sortBy;
         }
         else {
-            if (!sortBy.equals(currentSortBy) || currentHighlight != highlight) {
+            if ((!sortBy.equals(currentSortBy) || currentHighlight != highlight)
+                    && findWordsTask.getStatus() == AsyncTask.Status.FINISHED) {
                 currentSortBy = sortBy;
                 currentHighlight = highlight;
                 groups.clear();
-                groups.addAll(sortResults(rawResults, currentSortBy, currentHighlight));
-                adapter.notifyDataSetChanged();
+
+                final Handler handler = new Handler();
+
+                Runnable sortRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        groups.addAll(sortResults(rawResults, currentSortBy, currentHighlight));
+
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                adapter.notifyDataSetChanged();
+                            }
+                        });
+                    }
+                };
+
+                new Thread(sortRunnable).start();
             }
         }
     }
 
-    public ArrayList<String> possibleWords(String letters, Iterable<String> words, int minLength, String substring) {
+    public ArrayList<String> possibleWords(String letters, Iterable<String> words, int minLength, String include) {
         // hold results
         ArrayList<String> results = new ArrayList<>();
         Pattern p;
         Matcher m = null;
+        int noOfBlanks = 0;
+        char[] blanks = null;
 
         // sort the letters we want to make words from
         char[] lettersToChar = letters.toLowerCase().toCharArray();
         Arrays.sort(lettersToChar);
 
-        // if the substring is a pattern, substitute underscores for periods and initialize the matcher
-        if (substring != null && substring.contains("_")) {
-            String regex = substring.replace("_", ".");
+        while (lettersToChar[noOfBlanks] == '_') {
+            noOfBlanks++;
+        }
+
+        if (noOfBlanks > 0) {
+            blanks = new char[noOfBlanks];
+        }
+
+        // if the include is a pattern, substitute underscores for periods and initialize the matcher
+        if (include != null && include.contains("_")) {
+            String regex = include.replace("_", ".");
             p = Pattern.compile(regex);
             m = p.matcher("");
         }
 
         for (String s : words) {
-            // if the word contains too many letters move onto the next one
+            // if the word contains too many (or too few) letters move onto the next one
             if (s.length() > letters.length() || s.length() < minLength) continue;
-            // if the substring is set but is not contained in this word, move on
-            if (substring != null && !s.contains(substring)) {
-                if (!substring.contains("_")) {
+            // if the include is set but is not contained in this word, move on
+            if (include != null && !s.contains(include)) {
+                if (!include.contains("_")) {
                     continue;
                 }
             }
@@ -168,29 +207,27 @@ public class DisplayExpandableResultFragment extends Fragment {
             Arrays.sort(sToChar);
 
             // keeps track of where we last found a match
-            int n = 0;
+            int n = noOfBlanks;
             // count the letter matches made, if this equals the number of letters
             // in the word then it will be added to the result
             int count = 0;
-            int noOfBlanks = 0;
-
+            int filledBlanks = 0;
             // look for each of the search letters
-            for (int i = 0; i < lettersToChar.length; i++) {
-                char c = lettersToChar[i];
-                if (c == '_') {
-                    // account for wildcard
-                    noOfBlanks++;
-                    continue;
-                }
-
-                for (int j = n; j < sToChar.length; j++) {
+            for (char c : sToChar) {
+                boolean found = false;
+                for (int j = n; j < lettersToChar.length; j++) {
                     // if the letter is found in the word, increment count
                     // and set n to the index we start searching for the next letter
-                    if (c == sToChar[j]) {
+                    if (c == lettersToChar[j]) {
                         count++;
                         n = j + 1;
+                        found = true;
                         break;
                     }
+                }
+                if (!found && filledBlanks < noOfBlanks) {
+                    blanks[filledBlanks] = c;
+                    filledBlanks++;
                 }
             }
 
@@ -199,56 +236,22 @@ public class DisplayExpandableResultFragment extends Fragment {
             // add it to the result
             if ((s.length() >= count && s.length() <= count + noOfBlanks)) {
                 // if the pattern is set and the string does not contain it, continue
-                if (substring != null && substring.contains("_") && m != null) {
+                if (include != null && include.contains("_") && m != null) {
                     m.reset(s);
                     if (!m.find()) {
                         continue;
                     }
                 }
 
-                if (noOfBlanks > 0) {
-                    char lastChar = ' ';
-                    for (char c : sToChar) {
-                        int noInLetters = 0;
-                        int noInWord = 0;
-
-                        if (c == lastChar) continue;
-                        // count the occurrences of each letter in the entered letters
-                        for (int j = 0; j < lettersToChar.length; j++) {
-                            if (lettersToChar[j] == c) {
-                                noInLetters++;
-                            }
+                /*if (noOfBlanks > 0) {
+                    StringBuilder b = new StringBuilder(s);
+                    for (int i = 0; i < blanks.length; i++) {
+                        char x = blanks[i];
+                        if (s.lastIndexOf(x) != -1) {
+                            b.replace(s.lastIndexOf(x), s.lastIndexOf(x) + 1,
+                                    String.valueOf(Character.toUpperCase(x)));
+                            s = b.toString();
                         }
-                        // count the occurrences of each letter in the word
-                        for (int j = 0; j < sToChar.length; j++) {
-                            if (sToChar[j] == c) {
-                                noInWord++;
-                            }
-                        }
-                        // compare the occurrences in each
-                        if (noInWord > noInLetters) {
-                            int repeat = noInWord - noInLetters;
-
-                            for (int i = 0; i < repeat; i++) {
-
-                                if (s.lastIndexOf(Character.toUpperCase(c)) != -1) {
-                                    String front = s.substring(0, s.lastIndexOf(Character.toUpperCase(c)));
-                                    String back = s.substring(s.lastIndexOf(Character.toUpperCase(c)));
-                                    StringBuilder b = new StringBuilder(front);
-                                    b.replace(front.lastIndexOf(c), front.lastIndexOf(c) + 1,
-                                            String.valueOf(Character.toUpperCase(c)));
-                                    front = b.toString();
-
-                                    s = front + back;
-                                } else {
-                                    StringBuilder b = new StringBuilder(s);
-                                    b.replace(s.lastIndexOf(c), s.lastIndexOf(c) + 1,
-                                            String.valueOf(Character.toUpperCase(c)));
-                                    s = b.toString();
-                                }
-                            }
-                        }
-                        lastChar = c;
                     }
                     // highlight the letters
                     for (int i = 0; i < s.length(); i++) {
@@ -258,10 +261,21 @@ public class DisplayExpandableResultFragment extends Fragment {
                                     + s.substring(i + 1);
                         }
                     }
-                }
+
+                }*/
+                /*SpannableStringBuilder sb = new SpannableStringBuilder(s);
+                if (noOfBlanks > 0) {
+                    for (int i = 0; i < blanks.length; i++) {
+                        char x = blanks[i];
+                        if (s.lastIndexOf(x) != -1) {
+                            sb.setSpan(new ForegroundColorSpan(0xFFCC5500), s.lastIndexOf(x), s.lastIndexOf(x) + 1,
+                                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            s = sb.toString();
+                        }
+                    }
+                }*/
                 results.add(s);
             }
-
         }
         return results;
     }
@@ -410,19 +424,22 @@ public class DisplayExpandableResultFragment extends Fragment {
         return groups;
     }
 
-    private class FindWordsTask extends AsyncTask<String, Void, ArrayList<String>> {
+    private class FindWordsTask extends AsyncTask<String, Void, ArrayList<Group>> {
 
         @Override
         protected void onPreExecute() {
-
+            if (callbacks != null) {
+                pb = new ProgressBar(callbacks.get().getApplicationContext(), null,
+                        android.R.attr.progressBarStyleHorizontal);
+                pb.setIndeterminate(true);
+                ((LinearLayout) v).addView(pb);
+            }
         }
 
-        protected ArrayList<String> doInBackground(String... letters) {
+        protected ArrayList<Group> doInBackground(String... letters) {
             String allLetters = letters[0];
             if (include != null) {
                 String lettersToAdd = include.replace("_", "");
-                Log.d("ADD", lettersToAdd);
-                Log.d("INCLUDE", include);
                 allLetters = allLetters + lettersToAdd;
             }
             int minLetters = Integer.parseInt(PreferenceManager.
@@ -467,18 +484,17 @@ public class DisplayExpandableResultFragment extends Fragment {
                 });
             }
 
-            return results;
-        }
-
-        protected void onPostExecute(ArrayList<String> results) {
+            rawResults = results;
             if (callbacks != null) {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(callbacks.get());
                 String orderBy = prefs.getString("order", "1");
 
-                rawResults = results;
                 groups.addAll(sortResults(results, orderBy, currentHighlight));
             }
+            return groups;
+        }
 
+        protected void onPostExecute(ArrayList<Group> groups) {
             // if upon trying to restore the fragments previous state the wordlist is null, reset
             // the app to it's starting conditions
             if (groups == null && callbacks != null) {
@@ -486,14 +502,13 @@ public class DisplayExpandableResultFragment extends Fragment {
             }
             else {
                 adapter.notifyDataSetChanged();
-                if (results.isEmpty()) {
+                if (groups.isEmpty()) {
                     TextView emptyView = (TextView) v.findViewById(R.id.emptyView);
                     lv.setEmptyView(emptyView);
                 }
-                if (callbacks != null)
-                    //container.removeView(pb);
-                    callbacks.get().enableButtons();
             }
+
+            ((LinearLayout) v).removeView(pb);
         }
 
     }
