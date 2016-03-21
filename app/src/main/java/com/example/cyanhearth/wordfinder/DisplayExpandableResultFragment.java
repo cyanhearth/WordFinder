@@ -40,7 +40,7 @@ public class DisplayExpandableResultFragment extends Fragment {
 
     private ProgressBar pb;
 
-    private ArrayList<String> rawResults;
+    private ArrayList<SpannableStringBuilder> rawResults;
     private ArrayList<Group> groups;
     private String include;
     private String letters;
@@ -110,7 +110,7 @@ public class DisplayExpandableResultFragment extends Fragment {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 callbacks.get().onExpandableItemSelected(((Child) (parent.getExpandableListAdapter()
-                        .getChild(groupPosition, childPosition))).getChildName());
+                        .getChild(groupPosition, childPosition))).getChildName().toString());
                 return true;
             }
         });
@@ -165,9 +165,9 @@ public class DisplayExpandableResultFragment extends Fragment {
         }
     }
 
-    public ArrayList<String> possibleWords(String letters, Iterable<String> words, int minLength, String include) {
+    public ArrayList<SpannableStringBuilder> possibleWords(String letters, Iterable<String> words, int minLength, String include) {
         // hold results
-        ArrayList<String> results = new ArrayList<>();
+        ArrayList<SpannableStringBuilder> results = new ArrayList<>();
         Pattern p;
         Matcher m = null;
         int noOfBlanks = 0;
@@ -243,38 +243,23 @@ public class DisplayExpandableResultFragment extends Fragment {
                     }
                 }
 
-                /*if (noOfBlanks > 0) {
-                    StringBuilder b = new StringBuilder(s);
-                    for (int i = 0; i < blanks.length; i++) {
-                        char x = blanks[i];
-                        if (s.lastIndexOf(x) != -1) {
-                            b.replace(s.lastIndexOf(x), s.lastIndexOf(x) + 1,
-                                    String.valueOf(Character.toUpperCase(x)));
-                            s = b.toString();
-                        }
-                    }
-                    // highlight the letters
-                    for (int i = 0; i < s.length(); i++) {
-                        if (Character.isUpperCase(s.charAt(i))) {
-                            s = s.substring(0, i)
-                                    + "<font color='red'>" + Character.toLowerCase(s.charAt(i)) + "</font>"
-                                    + s.substring(i + 1);
-                        }
-                    }
-
-                }*/
-                /*SpannableStringBuilder sb = new SpannableStringBuilder(s);
+                SpannableStringBuilder sb = new SpannableStringBuilder(s);
                 if (noOfBlanks > 0) {
+                    char lastChar = 0;
+                    int lastIndex = -1;
                     for (int i = 0; i < blanks.length; i++) {
                         char x = blanks[i];
-                        if (s.lastIndexOf(x) != -1) {
-                            sb.setSpan(new ForegroundColorSpan(0xFFCC5500), s.lastIndexOf(x), s.lastIndexOf(x) + 1,
+                        int index = (x != lastChar ? s.lastIndexOf(x) :
+                                (String.valueOf(sb.subSequence(0, lastIndex))).lastIndexOf(x));
+                        if (index != -1) {
+                            sb.setSpan(new ForegroundColorSpan(0xFFCC5500), index, index + 1,
                                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            s = sb.toString();
+                            lastChar = x;
+                            lastIndex = index;
                         }
                     }
-                }*/
-                results.add(s);
+                }
+                results.add(sb);
             }
         }
         return results;
@@ -334,7 +319,11 @@ public class DisplayExpandableResultFragment extends Fragment {
         return score;
     }
 
-    public ArrayList<Group> sortResults(ArrayList<String> results, String sortBy, boolean highlight) {
+    public ArrayList<Group> sortResults(ArrayList<SpannableStringBuilder> results, String sortBy, boolean highlight) {
+        ArrayList<SpannableStringBuilder> tempResults = new ArrayList<>(results.size());
+        for (SpannableStringBuilder s : results) {
+            tempResults.add(new SpannableStringBuilder(SpannableString.valueOf(s)));
+        }
         if (results == null) {
             return null;
         }
@@ -343,9 +332,8 @@ public class DisplayExpandableResultFragment extends Fragment {
 
         int groupId;
 
-        for (String word : results) {
-            String strippedWord = word.replace("<font color='red'>", "");
-            strippedWord = strippedWord.replace("</font>", "");
+        for (SpannableStringBuilder word : tempResults) {
+            String strippedWord = word.toString();
             int score = getScrabbleScore(strippedWord);
             switch (sortBy) {
                 case "0":
@@ -365,7 +353,7 @@ public class DisplayExpandableResultFragment extends Fragment {
             }
 
             if (!highlight) {
-                word = strippedWord;
+                word.clearSpans();
             }
 
             boolean groupExists = false;
@@ -450,7 +438,7 @@ public class DisplayExpandableResultFragment extends Fragment {
                 minLetters = allLetters.length();
             }
 
-            ArrayList<String> results = null;
+            ArrayList<SpannableStringBuilder> results = null;
 
             Iterable<String> words = callbacks.get().words;
 
@@ -459,15 +447,13 @@ public class DisplayExpandableResultFragment extends Fragment {
                         minLetters, include);
 
                 // sort alphabetically
-                Collections.sort(results, new Comparator<String>() {
+                Collections.sort(results, new Comparator<SpannableStringBuilder>() {
 
                     @Override
-                    public int compare(String lhs, String rhs) {
-                        String strippedLeft = lhs.replace("<font color='red'>", "");
-                        strippedLeft = strippedLeft.replace("</font>", "");
+                    public int compare(SpannableStringBuilder lhs, SpannableStringBuilder rhs) {
+                        String strippedLeft = lhs.toString();
 
-                        String strippedRight = rhs.replace("<font color='red'>", "");
-                        strippedRight = strippedRight.replace("</font>", "");
+                        String strippedRight = rhs.toString();
 
                         int compare = strippedLeft.compareTo(strippedRight);
 

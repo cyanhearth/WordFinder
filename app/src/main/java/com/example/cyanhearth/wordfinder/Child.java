@@ -1,21 +1,23 @@
 package com.example.cyanhearth.wordfinder;
 
+import android.text.SpannableStringBuilder;
+
 /**
  * Created by cyanhearth on 16/02/2016.
  */
 public class Child implements Comparable<Child> {
 
-    private String childName;
+    private SpannableStringBuilder childName;
     private int childScore;
 
-    public Child(String childName, int childScore) {
+    public Child(SpannableStringBuilder childName, int childScore) {
         this.childName = childName;
         this.childScore = childScore;
     }
 
     @Override
     public int compareTo(Child another) {
-        int compare = this.childName.compareTo(another.getChildName());
+        int compare = this.childName.toString().compareTo(another.getChildName().toString());
         if (compare > 0) {
             return 1;
         }
@@ -28,7 +30,7 @@ public class Child implements Comparable<Child> {
     }
 
     //getters
-    public  String getChildName() {
+    public  SpannableStringBuilder getChildName() {
         return childName;
     }
 
@@ -38,7 +40,7 @@ public class Child implements Comparable<Child> {
     }
 
     //setters
-    public void setChildName(String childName) {
+    public void setChildName(SpannableStringBuilder childName) {
         this.childName = childName;
     }
 
