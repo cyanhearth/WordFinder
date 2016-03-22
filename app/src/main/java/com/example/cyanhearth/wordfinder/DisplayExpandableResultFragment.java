@@ -121,6 +121,7 @@ public class DisplayExpandableResultFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
         if(rawResults == null) {
             findWordsTask = new FindWordsTask();
             findWordsTask.execute(letters);
@@ -139,16 +140,16 @@ public class DisplayExpandableResultFragment extends Fragment {
         }
         else {
             if ((!sortBy.equals(currentSortBy) || currentHighlight != highlight)
-                    && findWordsTask.getStatus() == AsyncTask.Status.FINISHED) {
+                    && findWordsTask.getStatus() != AsyncTask.Status.RUNNING) {
                 currentSortBy = sortBy;
                 currentHighlight = highlight;
-                groups.clear();
 
                 final Handler handler = new Handler();
 
                 Runnable sortRunnable = new Runnable() {
                     @Override
                     public void run() {
+                        groups.clear();
                         groups.addAll(sortResults(rawResults, currentSortBy, currentHighlight));
 
                         handler.post(new Runnable() {
@@ -323,9 +324,6 @@ public class DisplayExpandableResultFragment extends Fragment {
         ArrayList<SpannableStringBuilder> tempResults = new ArrayList<>(results.size());
         for (SpannableStringBuilder s : results) {
             tempResults.add(new SpannableStringBuilder(SpannableString.valueOf(s)));
-        }
-        if (results == null) {
-            return null;
         }
 
         ArrayList<Group> groups = new ArrayList<>();
