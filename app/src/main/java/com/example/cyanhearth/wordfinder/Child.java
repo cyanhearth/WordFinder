@@ -7,17 +7,17 @@ import android.text.SpannableStringBuilder;
  */
 public class Child implements Comparable<Child> {
 
-    private SpannableStringBuilder childName;
+    private String childName;
     private int childScore;
 
-    public Child(SpannableStringBuilder childName, int childScore) {
+    public Child(String childName, int childScore) {
         this.childName = childName;
         this.childScore = childScore;
     }
 
     @Override
     public int compareTo(Child another) {
-        int compare = this.childName.toString().compareTo(another.getChildName().toString());
+        int compare = this.childName.compareTo(another.getChildName());
         if (compare > 0) {
             return 1;
         }
@@ -30,7 +30,7 @@ public class Child implements Comparable<Child> {
     }
 
     //getters
-    public  SpannableStringBuilder getChildName() {
+    public  String getChildName() {
         return childName;
     }
 
@@ -40,7 +40,7 @@ public class Child implements Comparable<Child> {
     }
 
     //setters
-    public void setChildName(SpannableStringBuilder childName) {
+    public void setChildName(String childName) {
         this.childName = childName;
     }
 

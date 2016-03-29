@@ -11,6 +11,7 @@ import android.inputmethodservice.KeyboardView;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -162,7 +163,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 String letters = lettersInput.getText().toString();
-                if (letters.equals("") && (includeWord == null || !includeWord.contains("_"))) {
+                if ((letters.equals("") || letters.equals("_") || letters.equals("__")) && includeWord == null) {
                     Toast.makeText(MainActivity.this, "Please enter some letters!",
                             Toast.LENGTH_SHORT).show();
                 }
@@ -384,6 +385,9 @@ public class MainActivity extends ActionBarActivity {
         DisplayExpandableResultFragment fragment = (DisplayExpandableResultFragment) getFragmentManager()
                 .findFragmentByTag(TAG_RESULTS_FRAGMENT);
         if (fragment != null) {
+            if (fragment.findWordsTask.getStatus() != AsyncTask.Status.FINISHED) {
+                fragment.findWordsTask.cancel(true);
+            }
             getFragmentManager().beginTransaction().remove(fragment).commit();
         }
 

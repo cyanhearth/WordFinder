@@ -40,12 +40,12 @@ public class DisplayExpandableResultFragment extends Fragment {
 
     private ProgressBar pb;
 
-    private ArrayList<SpannableStringBuilder> rawResults;
+    private ArrayList<String> rawResults;
     private ArrayList<Group> groups;
     private String include;
     private String letters;
 
-    private AsyncTask<String, Void, ArrayList<Group>> findWordsTask;
+    public AsyncTask<String, Void, ArrayList<Group>> findWordsTask;
 
     private ExpandableListView lv;
 
@@ -110,7 +110,7 @@ public class DisplayExpandableResultFragment extends Fragment {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 callbacks.get().onExpandableItemSelected(((Child) (parent.getExpandableListAdapter()
-                        .getChild(groupPosition, childPosition))).getChildName().toString());
+                        .getChild(groupPosition, childPosition))).getChildName());
                 return true;
             }
         });
@@ -149,8 +149,9 @@ public class DisplayExpandableResultFragment extends Fragment {
                 Runnable sortRunnable = new Runnable() {
                     @Override
                     public void run() {
+                        ArrayList<Group> temp = sortResults(rawResults, currentSortBy, currentHighlight);
                         groups.clear();
-                        groups.addAll(sortResults(rawResults, currentSortBy, currentHighlight));
+                        groups.addAll(temp);
 
                         handler.post(new Runnable() {
                             @Override
@@ -166,9 +167,9 @@ public class DisplayExpandableResultFragment extends Fragment {
         }
     }
 
-    public ArrayList<SpannableStringBuilder> possibleWords(String letters, Iterable<String> words, int minLength, String include) {
+    public ArrayList<String> possibleWords(String letters, Iterable<String> words, int minLength, String include) {
         // hold results
-        ArrayList<SpannableStringBuilder> results = new ArrayList<>();
+        ArrayList<String> results = new ArrayList<>();
         Pattern p;
         Matcher m = null;
         int noOfBlanks = 0;
@@ -178,8 +179,12 @@ public class DisplayExpandableResultFragment extends Fragment {
         char[] lettersToChar = letters.toLowerCase().toCharArray();
         Arrays.sort(lettersToChar);
 
-        while (lettersToChar[noOfBlanks] == '_') {
-            noOfBlanks++;
+        for (int i = 0; i < lettersToChar.length; i++) {
+            if (lettersToChar[noOfBlanks] == '_') {
+                noOfBlanks++;
+                continue;
+            }
+            break;
         }
 
         if (noOfBlanks > 0) {
@@ -188,12 +193,33 @@ public class DisplayExpandableResultFragment extends Fragment {
 
         // if the include is a pattern, substitute underscores for periods and initialize the matcher
         if (include != null && include.contains("_")) {
-            String regex = include.replace("_", ".");
+            String regex;
+            // if the leading and trailing underscores were not redundant set the regex
+            if (include.charAt(0) == '_' && include.charAt(include.length() - 1) == '_') {
+                regex = "\\w+" + include.replaceAll("^_+|_+$", "") + "\\w+";
+            }
+            // if the expression starts with an underscore, want to find words that end with the
+            // letters that come after the underscore
+            else if (include.charAt(0) == '_') {
+                regex = "\\w+" + include.replaceAll("^_+|_+$", "") + "$";
+            }
+            // if only the last character is an underscore, look for words that start with the
+            // letters that come before the underscore
+            else if (include.charAt(include.length() - 1) == '_') {
+                regex = "^" + include.replaceAll("^_+|_+$", "") + "\\w+";
+            }
+            else {
+                regex = include;
+            }
+            regex = regex.replace("_", ".");
             p = Pattern.compile(regex);
             m = p.matcher("");
         }
 
         for (String s : words) {
+            if (findWordsTask.isCancelled()) {
+                break;
+            }
             // if the word contains too many (or too few) letters move onto the next one
             if (s.length() > letters.length() || s.length() < minLength) continue;
             // if the include is set but is not contained in this word, move on
@@ -244,23 +270,23 @@ public class DisplayExpandableResultFragment extends Fragment {
                     }
                 }
 
-                SpannableStringBuilder sb = new SpannableStringBuilder(s);
                 if (noOfBlanks > 0) {
-                    char lastChar = 0;
-                    int lastIndex = -1;
-                    for (int i = 0; i < blanks.length; i++) {
-                        char x = blanks[i];
-                        int index = (x != lastChar ? s.lastIndexOf(x) :
-                                (String.valueOf(sb.subSequence(0, lastIndex))).lastIndexOf(x));
-                        if (index != -1) {
-                            sb.setSpan(new ForegroundColorSpan(0xFFCC5500), index, index + 1,
-                                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            lastChar = x;
-                            lastIndex = index;
+                    int blanksFound = 0;
+                    for (int i = s.length() - 1; i >= 0; i--) {
+                        for (int j = 0; j < blanks.length; j++) {
+                            if (s.charAt(i) == blanks[j]) {
+                                s = s.substring(0, i) + "<font color='red'>" +
+                                        s.charAt(i) + "</font>" +s.substring(i + 1);
+                                blanks[j] = 0;
+                                blanksFound++;
+                            }
+                        }
+                        if (blanksFound == blanks.length) {
+                            break;
                         }
                     }
                 }
-                results.add(sb);
+                results.add(s);
             }
         }
         return results;
@@ -320,18 +346,19 @@ public class DisplayExpandableResultFragment extends Fragment {
         return score;
     }
 
-    public ArrayList<Group> sortResults(ArrayList<SpannableStringBuilder> results, String sortBy, boolean highlight) {
-        ArrayList<SpannableStringBuilder> tempResults = new ArrayList<>(results.size());
-        for (SpannableStringBuilder s : results) {
+    public ArrayList<Group> sortResults(ArrayList<String> results, String sortBy, boolean highlight) {
+        //ArrayList<SpannableStringBuilder> tempResults = new ArrayList<>(results.size());
+        /*for (SpannableStringBuilder s : results) {
             tempResults.add(new SpannableStringBuilder(SpannableString.valueOf(s)));
-        }
+        }*/
 
         ArrayList<Group> groups = new ArrayList<>();
 
         int groupId;
 
-        for (SpannableStringBuilder word : tempResults) {
-            String strippedWord = word.toString();
+        for (String word : results) {
+            String strippedWord = word.replace("<font color='red'>", "");
+            strippedWord = strippedWord.replace("</font>", "");
             int score = getScrabbleScore(strippedWord);
             switch (sortBy) {
                 case "0":
@@ -351,7 +378,8 @@ public class DisplayExpandableResultFragment extends Fragment {
             }
 
             if (!highlight) {
-                word.clearSpans();
+                //word.clearSpans();
+                word = strippedWord;
             }
 
             boolean groupExists = false;
@@ -436,7 +464,7 @@ public class DisplayExpandableResultFragment extends Fragment {
                 minLetters = allLetters.length();
             }
 
-            ArrayList<SpannableStringBuilder> results = null;
+            ArrayList<String> results = null;
 
             Iterable<String> words = callbacks.get().words;
 
@@ -445,13 +473,15 @@ public class DisplayExpandableResultFragment extends Fragment {
                         minLetters, include);
 
                 // sort alphabetically
-                Collections.sort(results, new Comparator<SpannableStringBuilder>() {
+                Collections.sort(results, new Comparator<String>() {
 
                     @Override
-                    public int compare(SpannableStringBuilder lhs, SpannableStringBuilder rhs) {
-                        String strippedLeft = lhs.toString();
+                    public int compare(String lhs, String rhs) {
+                        String strippedLeft = lhs.replace("<font color='red'>", "");
+                        strippedLeft = strippedLeft.replace("</font>", "");
 
-                        String strippedRight = rhs.toString();
+                        String strippedRight = rhs.replace("<font color='red'>", "");
+                        strippedRight = strippedRight.replace("</font>", "");
 
                         int compare = strippedLeft.compareTo(strippedRight);
 
@@ -481,18 +511,27 @@ public class DisplayExpandableResultFragment extends Fragment {
         protected void onPostExecute(ArrayList<Group> groups) {
             // if upon trying to restore the fragments previous state the wordlist is null, reset
             // the app to it's starting conditions
-            if (groups == null && callbacks != null) {
-                callbacks.get().reset();
-            }
-            else {
-                adapter.notifyDataSetChanged();
-                if (groups.isEmpty()) {
-                    TextView emptyView = (TextView) v.findViewById(R.id.emptyView);
-                    lv.setEmptyView(emptyView);
+            if (callbacks != null) {
+                if (groups == null) {
+                    callbacks.get().reset();
+                } else {
+                    if (getActivity() != null) {
+                        adapter = new DisplayExpandableResultAdapter(getActivity().getApplicationContext(), groups);
+                        lv.setAdapter(adapter);
+                        //adapter.notifyDataSetChanged();
+                        if (groups.isEmpty()) {
+                            TextView emptyView = (TextView) v.findViewById(R.id.emptyView);
+                            lv.setEmptyView(emptyView);
+                        }
+                    }
                 }
+                ((LinearLayout) v).removeView(pb);
             }
+        }
 
-            ((LinearLayout) v).removeView(pb);
+        protected void onCancelled(ArrayList<Group> groups) {
+            Toast.makeText(callbacks.get().getApplicationContext(), "Search cancelled!",
+                    Toast.LENGTH_SHORT).show();
         }
 
     }
