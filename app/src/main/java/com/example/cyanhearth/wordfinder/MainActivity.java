@@ -37,6 +37,10 @@ public class MainActivity extends ActionBarActivity {
     private static final String TAG_DEBUG = "Debug";
     private static final String DEFAULT_DICTIONARY_STRING = "sowpods";
 
+    private static final int MAX_LETTERS = 16;
+    private static final int MAX_BLANKS_SEARCH = 2;
+    private static final int MAX_BLANKS_INCLUDE = 6;
+
     // Current network preference
     public static boolean wifiOnly;
 
@@ -163,12 +167,23 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 String letters = lettersInput.getText().toString();
-                if ((letters.equals("") || letters.equals("_") || letters.equals("__")) && includeWord == null) {
-                    Toast.makeText(MainActivity.this, "Please enter some letters!",
+                if (letters.equals("") && includeWord == null) {
+                    Toast.makeText(MainActivity.this,
+                            String.format("Enter up to %1$d letters", MAX_LETTERS),
                             Toast.LENGTH_SHORT).show();
                 }
-                else if (letters.length() - letters.replace("_", "").length() > 2){
-                    Toast.makeText(MainActivity.this, "No more than 2 wild cards can be used in a search!",
+                else if (letters.matches("^_+$")) {
+                    Toast.makeText(getApplicationContext(), "Include some letters in your search",
+                            Toast.LENGTH_SHORT).show();
+                }
+                else if (letters.length() - letters.replace("_", "").length() > MAX_BLANKS_SEARCH){
+                    Toast.makeText(MainActivity.this,
+                            String.format("Use %1$d wildcards or less in your search", MAX_BLANKS_SEARCH),
+                            Toast.LENGTH_SHORT).show();
+                }
+                else if (letters.length() > MAX_LETTERS) {
+                    Toast.makeText(MainActivity.this,
+                            String.format("Enter %1$d letters or less", MAX_LETTERS),
                             Toast.LENGTH_SHORT).show();
                 }
                 else {
@@ -219,10 +234,11 @@ public class MainActivity extends ActionBarActivity {
                     }
 
                 } else if (!currentWord.equals("")) {
-                    Toast.makeText(getApplicationContext(), currentWord +
-                            " is not in the current dictionary", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(),
+                            String.format("%1$s is not in the current dictionary", currentWord),
+                            Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Please enter a word first!",
+                    Toast.makeText(getApplicationContext(), "Please enter a word first.",
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -246,14 +262,34 @@ public class MainActivity extends ActionBarActivity {
                 includeWord = lettersInput.getText().toString();
 
                 if (includeWord.length() > 0) {
-                    String text = String.format(
-                            getResources().getString(R.string.include_message), includeWord);
-                    includeTextView.setText(text);
-                    lettersInput.setText("");
+                    if (includeWord.length() > MAX_LETTERS) {
+                        Toast.makeText(getApplicationContext(),
+                                String.format("Enter %1$d letters or less", MAX_LETTERS),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    else if (includeWord.matches("^_+$")) {
+                        Toast.makeText(getApplicationContext(),
+                                "Include some letters in your pattern",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    else if (includeWord.length() - includeWord.replace("_", "")
+                            .length() > MAX_BLANKS_INCLUDE) {
+                        Toast.makeText(getApplicationContext(),
+                                String.format("Use %1$d or less wildcard " +
+                                        "symbols in your pattern", MAX_BLANKS_INCLUDE),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        String text = String.format(
+                                getResources().getString(R.string.include_message), includeWord);
+                        includeTextView.setText(text);
+                        lettersInput.setText("");
+                    }
                 }
 
                 else {
-                    Toast.makeText(getApplicationContext(), "Please provide a word/pattern to include in your search.",
+                    Toast.makeText(getApplicationContext(),
+                            "Provide a word/pattern to include in your search",
                             Toast.LENGTH_SHORT).show();
                 }
             }
