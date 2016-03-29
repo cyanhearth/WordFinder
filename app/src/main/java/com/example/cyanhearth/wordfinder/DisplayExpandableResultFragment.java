@@ -196,7 +196,7 @@ public class DisplayExpandableResultFragment extends Fragment {
             String regex;
             // if the leading and trailing underscores were not redundant set the regex
             if (include.charAt(0) == '_' && include.charAt(include.length() - 1) == '_') {
-                regex = "\\w+" + include.replaceAll("^_+|_+$", "") + "\\w+";
+                regex = "\\w*" + include.replaceAll("^_+|_+$", "") + "\\w*";
             }
             // if the expression starts with an underscore, want to find words that end with the
             // letters that come after the underscore
@@ -206,7 +206,7 @@ public class DisplayExpandableResultFragment extends Fragment {
             // if only the last character is an underscore, look for words that start with the
             // letters that come before the underscore
             else if (include.charAt(include.length() - 1) == '_') {
-                regex = "^" + include.replaceAll("^_+|_+$", "") + "\\w+";
+                regex = "^" + include.replaceAll("^_+|_+$", "") + "\\w*";
             }
             else {
                 regex = include;
@@ -263,20 +263,35 @@ public class DisplayExpandableResultFragment extends Fragment {
             // add it to the result
             if ((s.length() >= count && s.length() <= count + noOfBlanks)) {
                 // if the pattern is set and the string does not contain it, continue
+                int end = -1;
+                int start = -1;
                 if (include != null && include.contains("_") && m != null) {
                     m.reset(s);
                     if (!m.find()) {
                         continue;
+                    }
+                    else {
+                        end = m.end() - 1;
+                        start = m.start();
                     }
                 }
 
                 if (noOfBlanks > 0) {
                     int blanksFound = 0;
                     for (int i = s.length() - 1; i >= 0; i--) {
+                        // do not highlight letters included in a pattern
+                        if (end > -1) {
+                            if (i >= start  && i <= end) {
+                                if (s.charAt(i) == include.charAt(end - start)) {
+                                    end--;
+                                    continue;
+                                }
+                            }
+                        }
                         for (int j = 0; j < blanks.length; j++) {
                             if (s.charAt(i) == blanks[j]) {
                                 s = s.substring(0, i) + "<font color='red'>" +
-                                        s.charAt(i) + "</font>" +s.substring(i + 1);
+                                        s.charAt(i) + "</font>" + s.substring(i + 1);
                                 blanks[j] = 0;
                                 blanksFound++;
                             }
@@ -284,6 +299,7 @@ public class DisplayExpandableResultFragment extends Fragment {
                         if (blanksFound == blanks.length) {
                             break;
                         }
+                        end--;
                     }
                 }
                 results.add(s);
