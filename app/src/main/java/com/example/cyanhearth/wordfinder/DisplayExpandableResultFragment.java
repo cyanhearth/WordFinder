@@ -179,8 +179,8 @@ public class DisplayExpandableResultFragment extends Fragment {
         char[] lettersToChar = letters.toLowerCase().toCharArray();
         Arrays.sort(lettersToChar);
 
-        for (int i = 0; i < lettersToChar.length; i++) {
-            if (lettersToChar[noOfBlanks] == '_') {
+        for (char c : lettersToChar) {
+            if (c == '_') {
                 noOfBlanks++;
                 continue;
             }
@@ -389,7 +389,7 @@ public class DisplayExpandableResultFragment extends Fragment {
                 default:
                     groupId = strippedWord.length();
                     Toast.makeText(callbacks.get(),
-                            "Error retrieving order setting: using default setting (by length).",
+                            "Error retrieving order setting: using default setting (by length)",
                             Toast.LENGTH_SHORT).show();
             }
 
@@ -482,10 +482,10 @@ public class DisplayExpandableResultFragment extends Fragment {
 
             ArrayList<String> results = null;
 
-            Iterable<String> words = callbacks.get().words;
+            Iterable<String> words = callbacks.get().dictFragment.getWords();
 
             if (words != null) {
-                results = possibleWords(allLetters, callbacks.get().words,
+                results = possibleWords(allLetters, callbacks.get().dictFragment.getWords(),
                         minLetters, include);
 
                 // sort alphabetically
@@ -546,7 +546,7 @@ public class DisplayExpandableResultFragment extends Fragment {
         }
 
         protected void onCancelled(ArrayList<Group> groups) {
-            Toast.makeText(callbacks.get().getApplicationContext(), "Search cancelled!",
+            Toast.makeText(callbacks.get().getApplicationContext(), "Search cancelled",
                     Toast.LENGTH_SHORT).show();
         }
 

@@ -149,10 +149,10 @@ public class DisplayResultFragment extends ListFragment {
 
             ArrayList<String> results = null;
 
-            Iterable<String> words = ((MainActivity) getActivity()).words;
+            Iterable<String> words = ((MainActivity) getActivity()).dictFragment.getWords();
 
             if (words != null) {
-                results = possibleWords(allLetters, ((MainActivity) getActivity()).words,
+                results = possibleWords(allLetters, ((MainActivity) getActivity()).dictFragment.getWords(),
                         minLetters, include);
 
                 // sort alphabetically

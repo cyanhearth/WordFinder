@@ -25,16 +25,15 @@
         android:id="@+id/buttonLayoutRow1"
         android:layout_below="@+id/editText"
         android:layout_centerHorizontal="true"
-        android:paddingTop="20dp">
+        android:paddingTop="10dp">
 
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginEnd="5dp"
-            android:layout_marginRight="5dp"
             android:layout_weight="1"
+            android:padding="20dp"
             android:text="@string/button_search"
-            android:background="@drawable/keybackground"
+            android:backgroundTint="@color/primary_light"
             android:textColor="#FFFFFF"
             android:id="@+id/button" />
 
@@ -44,7 +43,7 @@
             android:layout_weight="1"
             android:text="@string/button_define"
             android:textColor="#FFFFFF"
-            android:background="@drawable/keybackground"
+            android:backgroundTint="@color/primary_light"
             android:id="@+id/button2" />
     </LinearLayout>
 
@@ -55,7 +54,6 @@
         android:id="@+id/buttonLayoutRow2"
         android:layout_below="@+id/buttonLayoutRow1"
         android:layout_centerHorizontal="true"
-        android:paddingTop="10dp"
         android:paddingBottom="10dp">
 
         <Button
@@ -64,9 +62,8 @@
             android:text="@string/include"
             android:id="@+id/button4"
             android:textColor="#FFFFFF"
-            android:background="@drawable/keybackground"
-            android:layout_marginEnd="5dp"
-            android:layout_marginRight="5dp"
+            android:backgroundTint="@color/primary_light"
+            android:padding="20dp"
             android:layout_weight="1" />
 
         <Button
@@ -75,7 +72,7 @@
             android:layout_weight="1"
             android:text="@string/clear"
             android:textColor="#FFFFFF"
-            android:background="@drawable/keybackground"
+            android:backgroundTint="@color/primary_light"
             android:id="@+id/button3" />
     </LinearLayout>
 
@@ -84,7 +81,6 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/buttonLayoutRow2"
         android:id="@+id/fragment_container"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
 
         <android.inputmethodservice.KeyboardView

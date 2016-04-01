@@ -4,7 +4,6 @@
         <item>SOWPODS (International English)</item>
         <item>OSPD (US English)</item>
         <item>CSW15 (UK English)</item>
-        <item>TWL3 (US English)</item>
         <item>ENABLE1</item>
     </string-array>
 
@@ -12,7 +11,6 @@
         <item>SOWPODS</item>
         <item>OSPD</item>
         <item>CSW15</item>
-        <item>TWL3</item>
         <item>ENABLE1</item>
     </string-array>
 

@@ -89,9 +89,6 @@ public class LoadDictionaryFragment extends Fragment {
                 case "CSW15":
                     resourceId = R.raw.csw15;
                     break;
-                case "TWL3":
-                    resourceId = R.raw.twl3;
-                    break;
                 case "ENABLE1":
                     resourceId = R.raw.enable1;
                     break;
@@ -119,8 +116,8 @@ public class LoadDictionaryFragment extends Fragment {
         }
 
         protected void onPostExecute(HashSet<String> args) {
-            if (callbacks != null)
-                callbacks.get().onPostExecute(args);
+            //if (callbacks != null)
+                //callbacks.get().onPostExecute(args);
         }
     }
 }

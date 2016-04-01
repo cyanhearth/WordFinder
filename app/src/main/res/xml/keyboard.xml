@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Keyboard xmlns:android="http://schemas.android.com/apk/res/android"
-    android:keyWidth="10%"
     android:horizontalGap="0px"
     android:verticalGap="0px"
+    android:keyWidth="10%"
     android:keyHeight="48dp" >
 
     <Row>
@@ -26,7 +26,8 @@
         <Key android:codes="104" android:keyLabel="h" />
         <Key android:codes="106" android:keyLabel="j" />
         <Key android:codes="107" android:keyLabel="k" />
-        <Key android:codes="108" android:keyLabel="l" android:keyEdgeFlags="right"/>
+        <Key android:codes="108" android:keyLabel="l" />
+        <Key android:codes="95" android:keyLabel="_"  android:keyEdgeFlags="right"/>
     </Row>
     <Row>
         <Key android:codes="122" android:keyLabel="z" android:keyEdgeFlags="left" />
@@ -36,8 +37,7 @@
         <Key android:codes="98" android:keyLabel="b" />
         <Key android:codes="110" android:keyLabel="n" />
         <Key android:codes="109" android:keyLabel="m" />
-        <Key android:codes="95" android:keyLabel="_" />
         <Key android:codes="-1"  android:keyIcon="@drawable/ic_action_backspace"
-            android:keyEdgeFlags="right" android:keyWidth="20%"/>
+            android:keyEdgeFlags="right" android:keyWidth="30%"/>
     </Row>
 </Keyboard>

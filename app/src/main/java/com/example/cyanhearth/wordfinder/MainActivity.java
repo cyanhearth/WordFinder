@@ -15,14 +15,12 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.util.HashSet;
 
 public class MainActivity extends ActionBarActivity {
     private static final String BASE_URI = "https://en.wiktionary.org/wiki/";
@@ -33,8 +31,6 @@ public class MainActivity extends ActionBarActivity {
 
     private static final String TAG_TASK_FRAGMENT = "task_fragment";
     private static final String TAG_RESULTS_FRAGMENT = "results_fragment";
-    private static final String TAG_KEYBOARD_FRAGMENT = "keyboard_fragment";
-    private static final String TAG_DEBUG = "Debug";
     private static final String DEFAULT_DICTIONARY_STRING = "sowpods";
 
     private static final int MAX_LETTERS = 16;
@@ -48,15 +44,9 @@ public class MainActivity extends ActionBarActivity {
 
     private TextView includeTextView;
     private TextView lettersInput;
-    private Button search;
-    private Button define;
-    private Button clear;
-    private Button include;
 
     private KeyboardView keyboardView;
-
-    // holds all of the dictionary words
-    public HashSet<String> words;
+    public LoadDictionaryFragment dictFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,12 +59,12 @@ public class MainActivity extends ActionBarActivity {
 
         includeWord = null;
 
-        search = (Button)findViewById(R.id.button);
-        define = (Button)findViewById(R.id.button2);
-        clear = (Button)findViewById(R.id.button3);
-        include = (Button)findViewById(R.id.button4);
-        lettersInput = (TextView)findViewById(R.id.editText);
-        includeTextView = (TextView)findViewById(R.id.textView);
+        Button search = (Button) findViewById(R.id.button);
+        Button define = (Button) findViewById(R.id.button2);
+        Button clear = (Button) findViewById(R.id.button3);
+        Button include = (Button) findViewById(R.id.button4);
+        lettersInput = (TextView) findViewById(R.id.editText);
+        includeTextView = (TextView) findViewById(R.id.textView);
 
         final FragmentManager manager = getFragmentManager();
 
@@ -83,16 +73,17 @@ public class MainActivity extends ActionBarActivity {
         Keyboard keyboard = new Keyboard(this, R.xml.keyboard);
 
         // Lookup the KeyboardView
-        keyboardView = (KeyboardView)findViewById(R.id.keyboardview);
+        keyboardView = (KeyboardView) findViewById(R.id.keyboardview);
         // Attach the keyboard to the view
-        keyboardView.setKeyboard(keyboard) ;
+        keyboardView.setKeyboard(keyboard);
 
         // Do not show the preview balloons
         keyboardView.setPreviewEnabled(false);
 
         // Install the key handler
         keyboardView.setOnKeyboardActionListener(new KeyboardView.OnKeyboardActionListener() {
-            @Override public void onKey(int primaryCode, int[] keyCodes) {
+            @Override
+            public void onKey(int primaryCode, int[] keyCodes) {
                 //Here find the primaryCode to see which key is pressed
                 //based on the android:codes property
                 String inputText = lettersInput.getText().toString();
@@ -101,30 +92,37 @@ public class MainActivity extends ActionBarActivity {
                     lettersInput.setText(inputText);
                 }
                 if (primaryCode != -1) {
-                    inputText += String.valueOf((char)primaryCode);
+                    inputText += String.valueOf((char) primaryCode);
                     lettersInput.setText(inputText);
                 }
             }
 
-            @Override public void onPress(int arg0) {
+            @Override
+            public void onPress(int arg0) {
             }
 
-            @Override public void onRelease(int primaryCode) {
+            @Override
+            public void onRelease(int primaryCode) {
             }
 
-            @Override public void onText(CharSequence text) {
+            @Override
+            public void onText(CharSequence text) {
             }
 
-            @Override public void swipeDown() {
+            @Override
+            public void swipeDown() {
             }
 
-            @Override public void swipeLeft() {
+            @Override
+            public void swipeLeft() {
             }
 
-            @Override public void swipeRight() {
+            @Override
+            public void swipeRight() {
             }
 
-            @Override public void swipeUp() {
+            @Override
+            public void swipeUp() {
             }
         });
 
@@ -141,8 +139,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         // set up fragments
-        LoadDictionaryFragment dictFragment =
-                (LoadDictionaryFragment) manager.findFragmentByTag(TAG_TASK_FRAGMENT);
+        dictFragment = (LoadDictionaryFragment) manager.findFragmentByTag(TAG_TASK_FRAGMENT);
         FragmentTransaction transaction = manager.beginTransaction();
 
         // If the Fragment is non-null, then it is currently being
@@ -155,9 +152,9 @@ public class MainActivity extends ActionBarActivity {
             dictFragment.setArguments(args);
             transaction.add(dictFragment, TAG_TASK_FRAGMENT);
         }
-        else {
-            words = dictFragment.getWords();
-        }
+        //else {
+        //words = dictFragment.getWords();
+        //}
 
         transaction.commit();
 
@@ -386,15 +383,15 @@ public class MainActivity extends ActionBarActivity {
 
 
     public boolean isValidWord(String word) {
-        return words.contains(word.toLowerCase());
+        return dictFragment.getWords().contains(word.toLowerCase());
     }
 
     // LoadDictionaryFragment onPostExecute callback
 
-    public void onPostExecute(HashSet<String> words) {
+    //public void onPostExecute(HashSet<String> words) {
 
-        this.words = words;
-    }
+        //this.words = words;
+    //}
 
     public void onExpandableItemSelected(String word) {
         ConnectivityManager conn =  (ConnectivityManager)

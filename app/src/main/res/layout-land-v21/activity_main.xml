@@ -12,9 +12,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_toLeftOf="@+id/buttonLayout"
         android:layout_toStartOf="@+id/buttonLayout">
 
         <TextView
@@ -66,18 +64,15 @@
         android:paddingLeft="30dp"
         android:paddingRight="30dp"
         android:gravity="fill_horizontal"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="false"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true">
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_marginBottom="10dp"
-            android:padding="20dp"
             android:textColor="#FFFFFF"
-            android:background="@color/primary_light"
+            android:backgroundTint="@color/primary_light"
             android:text="@string/button_search"
             android:id="@+id/button" />
 
@@ -85,10 +80,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_marginBottom="10dp"
-            android:padding="20dp"
             android:textColor="#FFFFFF"
-            android:background="@color/primary_light"
+            android:backgroundTint="@color/primary_light"
             android:text="@string/button_define"
             android:id="@+id/button2" />
 
@@ -97,10 +90,8 @@
             android:layout_height="0dp"
             android:text="@string/include"
             android:textColor="#FFFFFF"
-            android:background="@color/primary_light"
+            android:backgroundTint="@color/primary_light"
             android:id="@+id/button4"
-            android:layout_marginBottom="10dp"
-            android:padding="20dp"
             android:layout_weight="1" />
 
         <Button
@@ -108,8 +99,7 @@
             android:layout_height="0dp"
             android:text="@string/clear"
             android:textColor="#FFFFFF"
-            android:background="@color/primary_light"
-            android:padding="20dp"
+            android:backgroundTint="@color/primary_light"
             android:id="@+id/button3"
             android:layout_weight="1" />
 
