@@ -1,14 +1,11 @@
 package com.example.cyanhearth.wordfinder;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
-
-import java.util.List;
 
 /**
  * Created by cyanhearth on 02/09/2015.
@@ -60,24 +57,27 @@ public class SettingsActivity extends PreferenceActivity {
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             switch (key) {
                 case DICTIONARY_KEY:
-                    String message = getResources().getText(R.string.dict_changed) + " "
-                            + sharedPreferences.getString(key, "");
+                    String message = String.format(
+                            getResources().getString(R.string.dict_changed),
+                            sharedPreferences.getString(key, ""));
                     Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
                     break;
                 case MIN_LENGTH_KEY:
                     String minLength = sharedPreferences.getString(key, "");
                     if (minLength.equals("0")) {
-                        minLength = "Use all letters";
+                        minLength = getResources().getString(R.string.use_all_letters);
                     }
-                    message = getResources().getText(R.string.length_changed) + " " + minLength;
+                    message = String.format(
+                            getResources().getString(R.string.length_changed),
+                            minLength);
                     Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
                     break;
                 case WIFI_ONLY_KEY:
                     if (sharedPreferences.getBoolean(WIFI_ONLY_KEY, false)) {
-                        message = "Wifi only";
+                        message = getResources().getString(R.string.wifi_only);
                     }
                     else {
-                        message = "Wifi or Data";
+                        message = getResources().getString(R.string.wifi_data);
                     }
                     Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
                     break;

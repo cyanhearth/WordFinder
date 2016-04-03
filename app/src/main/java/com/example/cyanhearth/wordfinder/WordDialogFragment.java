@@ -18,21 +18,19 @@ public class WordDialogFragment extends DialogFragment {
     }
 
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        word = getArguments().getString("word");
+        word = getArguments().getString(MainActivity.LETTERS_KEY);
 
         return new AlertDialog.Builder(getActivity())
-                .setMessage(word +
-                        " is in the current dictionary.\n\nWould you like to find the definition?\n"
-                        + "(Note: requires internet access)")
+                .setMessage(String.format(getResources().getString(R.string.word_dialog_string), word))
                 .setCancelable(false)
-                .setNegativeButton("No",
+                .setNegativeButton(getResources().getString(R.string.no),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dismiss();
                             }
                         })
-                .setPositiveButton("Yes",
+                .setPositiveButton(getResources().getString(R.string.yes),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {

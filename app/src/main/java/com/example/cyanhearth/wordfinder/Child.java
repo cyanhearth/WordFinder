@@ -1,6 +1,6 @@
 package com.example.cyanhearth.wordfinder;
 
-import android.text.SpannableStringBuilder;
+import android.support.annotation.NonNull;
 
 /**
  * Created by cyanhearth on 16/02/2016.
@@ -16,7 +16,7 @@ public class Child implements Comparable<Child> {
     }
 
     @Override
-    public int compareTo(Child another) {
+    public int compareTo(@NonNull Child another) {
         int compare = this.childName.compareTo(another.getChildName());
         if (compare > 0) {
             return 1;

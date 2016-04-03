@@ -7,11 +7,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +30,12 @@ import java.util.regex.Pattern;
 public class DisplayExpandableResultFragment extends Fragment {
 
     private static final String STATE_HIGHLIGHT = "state_highlight";
+    private static final String HIGHLIGHT_KEY = "highlight";
+    private static final String ORDER_KEY = "order";
+    private static final String LENGTH_KEY = "word_length";
+    private static final String ORDER_DEFAULT = "1";
+    private static final String LENGTH_DEFAULT = "3";
+    private static final boolean HIGHLIGHT_DEFAULT = true;
 
     private View v;
 
@@ -69,12 +70,12 @@ public class DisplayExpandableResultFragment extends Fragment {
 
         groups = new ArrayList<>();
 
-        letters = getArguments().getString("letters");
-        include = getArguments().getString("include");
+        letters = getArguments().getString(MainActivity.LETTERS_KEY);
+        include = getArguments().getString(MainActivity.INCLUDE_KEY);
 
         if (savedInstanceState == null) {
             currentHighlight = PreferenceManager.getDefaultSharedPreferences(callbacks.get())
-                    .getBoolean("highlight", true);
+                    .getBoolean(HIGHLIGHT_KEY, true);
         }
         else {
             currentHighlight = savedInstanceState.getBoolean(STATE_HIGHLIGHT);
@@ -132,8 +133,10 @@ public class DisplayExpandableResultFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        String sortBy = PreferenceManager.getDefaultSharedPreferences(callbacks.get()).getString("order", "1");
-        boolean highlight = PreferenceManager.getDefaultSharedPreferences(callbacks.get()).getBoolean("highlight", true);
+        String sortBy = PreferenceManager.getDefaultSharedPreferences(callbacks.get())
+                .getString(ORDER_KEY, ORDER_DEFAULT);
+        boolean highlight = PreferenceManager.getDefaultSharedPreferences(callbacks.get())
+                .getBoolean(HIGHLIGHT_KEY, HIGHLIGHT_DEFAULT);
 
         if (currentSortBy  == null) {
             currentSortBy = sortBy;
@@ -191,27 +194,9 @@ public class DisplayExpandableResultFragment extends Fragment {
             blanks = new char[noOfBlanks];
         }
 
-        // if the include is a pattern, substitute underscores for periods and initialize the matcher
+        // if the include contains a pattern, build the regular expression
         if (include != null && include.contains("_")) {
-            String regex;
-            // if the leading and trailing underscores were not redundant set the regex
-            if (include.charAt(0) == '_' && include.charAt(include.length() - 1) == '_') {
-                regex = "\\w*" + include.replaceAll("^_+|_+$", "") + "\\w*";
-            }
-            // if the expression starts with an underscore, want to find words that end with the
-            // letters that come after the underscore
-            else if (include.charAt(0) == '_') {
-                regex = "\\w+" + include.replaceAll("^_+|_+$", "") + "$";
-            }
-            // if only the last character is an underscore, look for words that start with the
-            // letters that come before the underscore
-            else if (include.charAt(include.length() - 1) == '_') {
-                regex = "^" + include.replaceAll("^_+|_+$", "") + "\\w*";
-            }
-            else {
-                regex = include;
-            }
-            regex = regex.replace("_", ".");
+            String regex = setPattern(include);
             p = Pattern.compile(regex);
             m = p.matcher("");
         }
@@ -253,8 +238,10 @@ public class DisplayExpandableResultFragment extends Fragment {
                     }
                 }
                 if (!found && filledBlanks < noOfBlanks) {
-                    blanks[filledBlanks] = c;
-                    filledBlanks++;
+                    if (blanks != null) {
+                        blanks[filledBlanks] = c;
+                        filledBlanks++;
+                    }
                 }
             }
 
@@ -271,41 +258,70 @@ public class DisplayExpandableResultFragment extends Fragment {
                         continue;
                     }
                     else {
+                        // end index (inclusive) of the pattern match in s
                         end = m.end() - 1;
+                        // start position of the pattern match in s
                         start = m.start();
                     }
                 }
 
                 if (noOfBlanks > 0) {
-                    int blanksFound = 0;
-                    for (int i = s.length() - 1; i >= 0; i--) {
-                        // do not highlight letters included in a pattern
-                        if (end > -1) {
-                            if (i >= start  && i <= end) {
-                                if (s.charAt(i) == include.charAt(end - start)) {
-                                    end--;
-                                    continue;
-                                }
-                            }
-                        }
-                        for (int j = 0; j < blanks.length; j++) {
-                            if (s.charAt(i) == blanks[j]) {
-                                s = s.substring(0, i) + "<font color='red'>" +
-                                        s.charAt(i) + "</font>" + s.substring(i + 1);
-                                blanks[j] = 0;
-                                blanksFound++;
-                            }
-                        }
-                        if (blanksFound == blanks.length) {
-                            break;
-                        }
-                        end--;
-                    }
+                    s = setHighlights(s, include, blanks, start, end);
                 }
                 results.add(s);
             }
         }
         return results;
+    }
+
+    private String setPattern(String include) {
+        String regex;
+        // if the leading and trailing underscores were not redundant set the regex
+        if (include.charAt(0) == '_' && include.charAt(include.length() - 1) == '_') {
+            regex = "\\w*" + include.replaceAll("^_+|_+$", "") + "\\w*";
+        }
+        // if the expression starts with an underscore, want to find words that end with the
+        // letters that come after the underscore
+        else if (include.charAt(0) == '_') {
+            regex = "\\w+" + include.replaceAll("^_+|_+$", "") + "$";
+        }
+        // if only the last character is an underscore, look for words that start with the
+        // letters that come before the underscore
+        else if (include.charAt(include.length() - 1) == '_') {
+            regex = "^" + include.replaceAll("^_+|_+$", "") + "\\w*";
+        }
+        else {
+            regex = include;
+        }
+        return regex.replace("_", ".");
+    }
+
+    private String setHighlights(String s, String include, char[] blanks, int start, int end) {
+        int blanksFound = 0;
+        int charToCompare = include == null ? -1 : include.length() - 1;
+        for (int i = s.length() - 1; i >= 0; i--) {
+            // do not highlight letters included in a pattern
+            if (i >= start  && i <= end) {
+                if (include != null && charToCompare >= 0) {
+                    if (s.charAt(i) == include.charAt(charToCompare)) {
+                        charToCompare--;
+                        continue;
+                    }
+                }
+            }
+            for (int j = 0; j < blanks.length; j++) {
+                if (s.charAt(i) == blanks[j]) {
+                    s = s.substring(0, i) + "<font color='" + getResources().getColor(R.color.accent) + "'>" +
+                            s.charAt(i) + "</font>" + s.substring(i + 1);
+                    blanks[j] = 0;
+                    blanksFound++;
+                }
+            }
+            if (blanksFound == blanks.length) {
+                break;
+            }
+        }
+        return s;
     }
 
     public int getScrabbleScore(String word) {
@@ -363,17 +379,11 @@ public class DisplayExpandableResultFragment extends Fragment {
     }
 
     public ArrayList<Group> sortResults(ArrayList<String> results, String sortBy, boolean highlight) {
-        //ArrayList<SpannableStringBuilder> tempResults = new ArrayList<>(results.size());
-        /*for (SpannableStringBuilder s : results) {
-            tempResults.add(new SpannableStringBuilder(SpannableString.valueOf(s)));
-        }*/
-
         ArrayList<Group> groups = new ArrayList<>();
-
         int groupId;
 
         for (String word : results) {
-            String strippedWord = word.replace("<font color='red'>", "");
+            String strippedWord = word.replace("<font color='" + getResources().getColor(R.color.accent) + "'>", "");
             strippedWord = strippedWord.replace("</font>", "");
             int score = getScrabbleScore(strippedWord);
             switch (sortBy) {
@@ -389,7 +399,7 @@ public class DisplayExpandableResultFragment extends Fragment {
                 default:
                     groupId = strippedWord.length();
                     Toast.makeText(callbacks.get(),
-                            "Error retrieving order setting: using default setting (by length)",
+                            getResources().getString(R.string.orderby_error),
                             Toast.LENGTH_SHORT).show();
             }
 
@@ -416,13 +426,16 @@ public class DisplayExpandableResultFragment extends Fragment {
                         groupName = String.valueOf((char) groupId).toUpperCase();
                         break;
                     case "1":
-                        groupName = String.valueOf(groupId) +  " letters";
+                        groupName = String.valueOf(groupId) +  " " +
+                                getResources().getString(R.string.orderby_letters);
                         break;
                     case "2":
-                        groupName = String.valueOf(groupId) + " points";
+                        groupName = String.valueOf(groupId) + " " +
+                                getResources().getString(R.string.orderby_points);
                         break;
                     default:
-                        groupName = String.valueOf(groupId) +  " letters";
+                        groupName = String.valueOf(groupId) +  " " +
+                                getResources().getString(R.string.orderby_letters);
                 }
 
                 Group group = new Group(groupId);
@@ -474,7 +487,7 @@ public class DisplayExpandableResultFragment extends Fragment {
             }
             int minLetters = Integer.parseInt(PreferenceManager.
                     getDefaultSharedPreferences(callbacks.get())
-                    .getString("word_length", "3"));
+                    .getString(LENGTH_KEY, LENGTH_DEFAULT));
 
             if (minLetters == 0) {
                 minLetters = allLetters.length();
@@ -482,10 +495,10 @@ public class DisplayExpandableResultFragment extends Fragment {
 
             ArrayList<String> results = null;
 
-            Iterable<String> words = callbacks.get().dictFragment.getWords();
+            Iterable<String> words = callbacks.get().words;
 
             if (words != null) {
-                results = possibleWords(allLetters, callbacks.get().dictFragment.getWords(),
+                results = possibleWords(allLetters, callbacks.get().words,
                         minLetters, include);
 
                 // sort alphabetically
@@ -493,10 +506,10 @@ public class DisplayExpandableResultFragment extends Fragment {
 
                     @Override
                     public int compare(String lhs, String rhs) {
-                        String strippedLeft = lhs.replace("<font color='red'>", "");
+                        String strippedLeft = lhs.replace("<font color='" + getResources().getColor(R.color.accent) + "'>", "");
                         strippedLeft = strippedLeft.replace("</font>", "");
 
-                        String strippedRight = rhs.replace("<font color='red'>", "");
+                        String strippedRight = rhs.replace("<font color='" + getResources().getColor(R.color.accent) + "'>", "");
                         strippedRight = strippedRight.replace("</font>", "");
 
                         int compare = strippedLeft.compareTo(strippedRight);
@@ -517,7 +530,7 @@ public class DisplayExpandableResultFragment extends Fragment {
             rawResults = results;
             if (callbacks != null) {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(callbacks.get());
-                String orderBy = prefs.getString("order", "1");
+                String orderBy = prefs.getString(ORDER_KEY, ORDER_DEFAULT);
 
                 groups.addAll(sortResults(results, orderBy, currentHighlight));
             }
@@ -532,7 +545,8 @@ public class DisplayExpandableResultFragment extends Fragment {
                     callbacks.get().reset();
                 } else {
                     if (getActivity() != null) {
-                        adapter = new DisplayExpandableResultAdapter(getActivity().getApplicationContext(), groups);
+                        adapter = new DisplayExpandableResultAdapter(
+                                getActivity().getApplicationContext(), groups);
                         lv.setAdapter(adapter);
                         //adapter.notifyDataSetChanged();
                         if (groups.isEmpty()) {
@@ -546,7 +560,8 @@ public class DisplayExpandableResultFragment extends Fragment {
         }
 
         protected void onCancelled(ArrayList<Group> groups) {
-            Toast.makeText(callbacks.get().getApplicationContext(), "Search cancelled",
+            Toast.makeText(callbacks.get().getApplicationContext(),
+                    getResources().getString(R.string.search_cancel),
                     Toast.LENGTH_SHORT).show();
         }
 

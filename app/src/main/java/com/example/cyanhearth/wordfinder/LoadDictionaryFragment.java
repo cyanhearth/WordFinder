@@ -9,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -66,7 +65,7 @@ public class LoadDictionaryFragment extends Fragment {
         // Retain this fragment across configuration changes.
         setRetainInstance(true);
 
-        currentDict = getArguments().getString("dict");
+        currentDict = getArguments().getString(MainActivity.DICTIONARY_KEY);
 
         // Create and execute the background task.
         startTask();
@@ -116,8 +115,8 @@ public class LoadDictionaryFragment extends Fragment {
         }
 
         protected void onPostExecute(HashSet<String> args) {
-            //if (callbacks != null)
-                //callbacks.get().onPostExecute(args);
+            if (callbacks != null)
+                callbacks.get().setDictionary(args);
         }
     }
 }

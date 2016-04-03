@@ -22,15 +22,24 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.HashSet;
+
 public class MainActivity extends ActionBarActivity {
     private static final String BASE_URI = "https://en.wiktionary.org/wiki/";
-    private static final String CHOOSER_TEXT = "Open with...";
+
     private static final String STATE_LETTERS = "state_letters";
     private static final String STATE_INCLUDE = "state_include";
     private static final String STATE_INCLUDE_WORD = "state_include_word";
 
     private static final String TAG_TASK_FRAGMENT = "task_fragment";
     private static final String TAG_RESULTS_FRAGMENT = "results_fragment";
+    private static final String TAG_DIALOG = "dialog";
+
+    public static final String DICTIONARY_KEY = "dict";
+    public static final String LETTERS_KEY = "letters";
+    public static final String INCLUDE_KEY = "include";
+
+    public static final boolean WIFI_DEFAULT = false;
     private static final String DEFAULT_DICTIONARY_STRING = "sowpods";
 
     private static final int MAX_LETTERS = 16;
@@ -40,13 +49,14 @@ public class MainActivity extends ActionBarActivity {
     // Current network preference
     public static boolean wifiOnly;
 
+    public HashSet<String> words;
+
     private String includeWord;
 
     private TextView includeTextView;
     private TextView lettersInput;
 
     private KeyboardView keyboardView;
-    public LoadDictionaryFragment dictFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,7 +149,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         // set up fragments
-        dictFragment = (LoadDictionaryFragment) manager.findFragmentByTag(TAG_TASK_FRAGMENT);
+        LoadDictionaryFragment dictFragment = (LoadDictionaryFragment) manager.findFragmentByTag(TAG_TASK_FRAGMENT);
         FragmentTransaction transaction = manager.beginTransaction();
 
         // If the Fragment is non-null, then it is currently being
@@ -148,13 +158,13 @@ public class MainActivity extends ActionBarActivity {
             dictFragment = LoadDictionaryFragment
                     .newInstance();
             Bundle args = new Bundle();
-            args.putString("dict", DEFAULT_DICTIONARY_STRING);
+            args.putString(DICTIONARY_KEY, DEFAULT_DICTIONARY_STRING);
             dictFragment.setArguments(args);
             transaction.add(dictFragment, TAG_TASK_FRAGMENT);
         }
-        //else {
-        //words = dictFragment.getWords();
-        //}
+        else {
+            words = dictFragment.getWords();
+        }
 
         transaction.commit();
 
@@ -166,21 +176,28 @@ public class MainActivity extends ActionBarActivity {
                 String letters = lettersInput.getText().toString();
                 if (letters.equals("") && includeWord == null) {
                     Toast.makeText(MainActivity.this,
-                            String.format("Enter up to %1$d letters", MAX_LETTERS),
+                            String.format(getResources()
+                                    .getString(R.string.search_empty),
+                                    MAX_LETTERS),
                             Toast.LENGTH_SHORT).show();
                 }
                 else if (letters.matches("^_+$")) {
-                    Toast.makeText(getApplicationContext(), "Include some letters in your search",
+                    Toast.makeText(getApplicationContext(),
+                            getResources().getString(R.string.search_no_letters),
                             Toast.LENGTH_SHORT).show();
                 }
                 else if (letters.length() - letters.replace("_", "").length() > MAX_BLANKS_SEARCH){
                     Toast.makeText(MainActivity.this,
-                            String.format("Use %1$d wildcards or less in your search", MAX_BLANKS_SEARCH),
+                            String.format(getResources()
+                                    .getString(R.string.search_exceeds_wild),
+                                    MAX_BLANKS_SEARCH),
                             Toast.LENGTH_SHORT).show();
                 }
                 else if (letters.length() > MAX_LETTERS) {
                     Toast.makeText(MainActivity.this,
-                            String.format("Enter %1$d letters or less", MAX_LETTERS),
+                            String.format(getResources()
+                                    .getString(R.string.search_exceeds_max),
+                                    MAX_LETTERS),
                             Toast.LENGTH_SHORT).show();
                 }
                 else {
@@ -193,8 +210,8 @@ public class MainActivity extends ActionBarActivity {
                             }
                         }
                     }
-                    args.putString("letters", letters);
-                    args.putString("include", includeWord);
+                    args.putString(LETTERS_KEY, letters);
+                    args.putString(INCLUDE_KEY, includeWord);
                     fragment.setArguments(args);
                     manager.beginTransaction()
                             .replace(R.id.fragment_container,
@@ -222,20 +239,24 @@ public class MainActivity extends ActionBarActivity {
                             || !wifiOnly && networkInfo != null) {
                         DialogFragment frag = WordDialogFragment.newInstance();
                         Bundle args = new Bundle();
-                        args.putString("word", currentWord);
+                        args.putString(LETTERS_KEY, currentWord);
                         frag.setArguments(args);
-                        frag.show(getFragmentManager(), "dialog");
+                        frag.show(getFragmentManager(), TAG_DIALOG);
                     } else {
-                        Toast.makeText(getApplicationContext(), "Cannot retrieve definitions: no network connection.",
+                        Toast.makeText(getApplicationContext(),
+                                getResources().getString(R.string.network_error),
                                 Toast.LENGTH_LONG).show();
                     }
 
                 } else if (!currentWord.equals("")) {
                     Toast.makeText(getApplicationContext(),
-                            String.format("%1$s is not in the current dictionary", currentWord),
+                            String.format(getResources()
+                                    .getString(R.string.word_not_found),
+                                    currentWord),
                             Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Please enter a word first.",
+                    Toast.makeText(getApplicationContext(),
+                            getResources().getString(R.string.word_empty),
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -261,19 +282,22 @@ public class MainActivity extends ActionBarActivity {
                 if (includeWord.length() > 0) {
                     if (includeWord.length() > MAX_LETTERS) {
                         Toast.makeText(getApplicationContext(),
-                                String.format("Enter %1$d letters or less", MAX_LETTERS),
+                                String.format(getResources()
+                                        .getString(R.string.search_exceeds_max),
+                                        MAX_LETTERS),
                                 Toast.LENGTH_SHORT).show();
                     }
                     else if (includeWord.matches("^_+$")) {
                         Toast.makeText(getApplicationContext(),
-                                "Include some letters in your pattern",
+                                getResources().getString(R.string.include_no_letters),
                                 Toast.LENGTH_SHORT).show();
                     }
                     else if (includeWord.length() - includeWord.replace("_", "")
                             .length() > MAX_BLANKS_INCLUDE) {
                         Toast.makeText(getApplicationContext(),
-                                String.format("Use %1$d or less wildcard " +
-                                        "symbols in your pattern", MAX_BLANKS_INCLUDE),
+                                String.format(getResources()
+                                        .getString(R.string.search_exceeds_wild),
+                                        MAX_BLANKS_INCLUDE),
                                 Toast.LENGTH_SHORT).show();
                     }
                     else {
@@ -286,7 +310,7 @@ public class MainActivity extends ActionBarActivity {
 
                 else {
                     Toast.makeText(getApplicationContext(),
-                            "Provide a word/pattern to include in your search",
+                            getResources().getString(R.string.include_empty),
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -298,7 +322,8 @@ public class MainActivity extends ActionBarActivity {
         Intent baseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriString));
 
         if (baseIntent.resolveActivity(getPackageManager()) != null) {
-            startActivity(Intent.createChooser(baseIntent, CHOOSER_TEXT));
+            startActivity(Intent.createChooser(baseIntent,
+                    getResources().getString(R.string.chooser_text)));
         }
     }
 
@@ -342,9 +367,9 @@ public class MainActivity extends ActionBarActivity {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        wifiOnly = preferences.getBoolean("wifi_only", false);
+        wifiOnly = preferences.getBoolean(SettingsActivity.WIFI_ONLY_KEY, WIFI_DEFAULT);
 
-        String dict = preferences.getString(SettingsActivity.DICTIONARY_KEY, "");
+        String dict = preferences.getString(SettingsActivity.DICTIONARY_KEY, DEFAULT_DICTIONARY_STRING);
 
         String currentDictString = ((LoadDictionaryFragment)
                 getFragmentManager().findFragmentByTag(TAG_TASK_FRAGMENT)).getCurrentDict();
@@ -383,15 +408,14 @@ public class MainActivity extends ActionBarActivity {
 
 
     public boolean isValidWord(String word) {
-        return dictFragment.getWords().contains(word.toLowerCase());
+        return words.contains(word.toLowerCase());
     }
 
     // LoadDictionaryFragment onPostExecute callback
+    public void setDictionary(HashSet<String> words) {
 
-    //public void onPostExecute(HashSet<String> words) {
-
-        //this.words = words;
-    //}
+        this.words = words;
+    }
 
     public void onExpandableItemSelected(String word) {
         ConnectivityManager conn =  (ConnectivityManager)
@@ -405,16 +429,12 @@ public class MainActivity extends ActionBarActivity {
             sendIntentForDefinition(word);
         }
         else {
-            Toast.makeText(this, "Cannot retrieve definition: no network connection",
+            Toast.makeText(this, getResources().getString(R.string.network_error),
                     Toast.LENGTH_LONG).show();
         }
     }
 
     public void reset() {
-        //if (getFragmentManager().findFragmentByTag(TAG_KEYBOARD_FRAGMENT) == null) {
-        //    getFragmentManager().beginTransaction().replace(R.id.fragment_container,
-        //            KeyboardFragment.newInstance(), TAG_KEYBOARD_FRAGMENT).commit();
-        //}
         DisplayExpandableResultFragment fragment = (DisplayExpandableResultFragment) getFragmentManager()
                 .findFragmentByTag(TAG_RESULTS_FRAGMENT);
         if (fragment != null) {
