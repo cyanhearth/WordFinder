@@ -6,6 +6,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.net.ConnectivityManager;
@@ -424,7 +425,7 @@ public class MainActivity extends ActionBarActivity {
 
         if (wifiOnly && networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI
                 || !wifiOnly && networkInfo != null) {
-            word = word.replace("<font color='red'>", "");
+            word = word.replace("<font color='" + getResources().getColor(R.color.accent) + "'>", "");
             word = word.replace("</font>", "");
             sendIntentForDefinition(word);
         }
@@ -450,21 +451,5 @@ public class MainActivity extends ActionBarActivity {
 
         includeTextView.setText("");
         lettersInput.setText("");
-    }
-
-    // onClick used by keyboard buttons
-    public void onButtonPressed(View view) {
-        Button buttonPressed = (Button) view;
-        String letter = buttonPressed.getText().toString();
-        String inputText = lettersInput.getText().toString();
-
-        if(buttonPressed.getId() == R.id.bksp && !inputText.equals("")) {
-            inputText = inputText.substring(0, inputText.length() - 1);
-            lettersInput.setText(inputText);
-        }
-        else {
-            inputText += letter;
-            lettersInput.setText(inputText);
-        }
     }
 }

@@ -315,6 +315,7 @@ public class DisplayExpandableResultFragment extends Fragment {
                             s.charAt(i) + "</font>" + s.substring(i + 1);
                     blanks[j] = 0;
                     blanksFound++;
+                    charToCompare--;
                 }
             }
             if (blanksFound == blanks.length) {
