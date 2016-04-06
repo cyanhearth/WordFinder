@@ -27,12 +27,6 @@
     <string name="enable1">ENABLE1</string>
 
     <!-- Toast message strings -->
-    <string name="dict_changed">Dictionary changed - %1$s</string>
-    <string name="length_changed">Minimum length changed - %1$s</string>
-    <string name="use_all_letters">Use all letters</string>
-    <string name="wifi_only">Wifi only</string>
-    <string name="wifi_data">Wifi or data</string>
-
     <string name="search_cancel">Search cancelled</string>
     <string name="orderby_error">Error retrieving order setting: using default setting (by length)</string>
     <string name="network_error">Cannot retrieve definition: no network connection</string>
@@ -44,7 +38,7 @@
 
     <string name="search_empty">Enter up to %1$d letters</string>
     <string name="search_no_letters">Include some letters in your search</string>
-    <string name="search_exceeds_wild">Use %1$d wildcards or less in your search</string>
+    <string name="search_exceeds_wild">Use %1$d \'blanks\' or less in your search</string>
     <string name="search_exceeds_max">Enter %1$d letters or less</string>
 
 </resources>

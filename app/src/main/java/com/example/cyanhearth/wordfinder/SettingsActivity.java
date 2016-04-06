@@ -2,10 +2,13 @@ package com.example.cyanhearth.wordfinder;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.ListPreference;
+import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.widget.Toast;
+
+import java.util.Set;
 
 /**
  * Created by cyanhearth on 02/09/2015.
@@ -35,6 +38,8 @@ public class SettingsActivity extends PreferenceActivity {
             super.onCreate(savedInstanceState);
 
             addPreferencesFromResource(R.xml.preferences);
+
+            initPreferences(getPreferenceManager());
         }
 
         @Override
@@ -53,37 +58,24 @@ public class SettingsActivity extends PreferenceActivity {
                     .unregisterOnSharedPreferenceChangeListener(this);
         }
 
+        private void initPreferences(PreferenceManager manager) {
+            Set<String> keys = PreferenceManager.getDefaultSharedPreferences(getActivity()).getAll().keySet();
+            for (String key : keys) {
+                updateSummary(manager.findPreference(key));
+            }
+        }
+
+        private void updateSummary(Preference p) {
+            if (p instanceof ListPreference) {
+                ListPreference listPref = (ListPreference) p;
+                listPref.setSummary(listPref.getEntry());
+            }
+        }
+
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            switch (key) {
-                case DICTIONARY_KEY:
-                    String message = String.format(
-                            getResources().getString(R.string.dict_changed),
-                            sharedPreferences.getString(key, ""));
-                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                    break;
-                case MIN_LENGTH_KEY:
-                    String minLength = sharedPreferences.getString(key, "");
-                    if (minLength.equals("0")) {
-                        minLength = getResources().getString(R.string.use_all_letters);
-                    }
-                    message = String.format(
-                            getResources().getString(R.string.length_changed),
-                            minLength);
-                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                    break;
-                case WIFI_ONLY_KEY:
-                    if (sharedPreferences.getBoolean(WIFI_ONLY_KEY, false)) {
-                        message = getResources().getString(R.string.wifi_only);
-                    }
-                    else {
-                        message = getResources().getString(R.string.wifi_data);
-                    }
-                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                    break;
-                default:
-                    break;
-            }
+            Preference p = getPreferenceManager().findPreference(key);
+            updateSummary(p);
         }
     }
 }

@@ -6,7 +6,6 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Point;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.net.ConnectivityManager;
@@ -45,7 +44,6 @@ public class MainActivity extends ActionBarActivity {
 
     private static final int MAX_LETTERS = 16;
     private static final int MAX_BLANKS_SEARCH = 2;
-    private static final int MAX_BLANKS_INCLUDE = 6;
 
     // Current network preference
     public static boolean wifiOnly;
@@ -103,8 +101,10 @@ public class MainActivity extends ActionBarActivity {
                     lettersInput.setText(inputText);
                 }
                 if (primaryCode != -1) {
-                    inputText += String.valueOf((char) primaryCode);
-                    lettersInput.setText(inputText);
+                    if (inputText.length() < MAX_LETTERS) {
+                        inputText += String.valueOf((char) primaryCode);
+                        lettersInput.setText(inputText);
+                    }
                 }
             }
 
@@ -175,7 +175,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 String letters = lettersInput.getText().toString();
-                if (letters.equals("") && includeWord == null) {
+                if (letters.equals("") && (includeWord == null || includeWord.equals(""))) {
                     Toast.makeText(MainActivity.this,
                             String.format(getResources()
                                     .getString(R.string.search_empty),
@@ -293,14 +293,14 @@ public class MainActivity extends ActionBarActivity {
                                 getResources().getString(R.string.include_no_letters),
                                 Toast.LENGTH_SHORT).show();
                     }
-                    else if (includeWord.length() - includeWord.replace("_", "")
+                    /*else if (includeWord.length() - includeWord.replace("_", "")
                             .length() > MAX_BLANKS_INCLUDE) {
                         Toast.makeText(getApplicationContext(),
                                 String.format(getResources()
                                         .getString(R.string.search_exceeds_wild),
                                         MAX_BLANKS_INCLUDE),
                                 Toast.LENGTH_SHORT).show();
-                    }
+                    }*/
                     else {
                         String text = String.format(
                                 getResources().getString(R.string.include_message), includeWord);

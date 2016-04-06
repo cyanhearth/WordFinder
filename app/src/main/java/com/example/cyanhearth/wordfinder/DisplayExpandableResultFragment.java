@@ -196,7 +196,7 @@ public class DisplayExpandableResultFragment extends Fragment {
 
         // if the include contains a pattern, build the regular expression
         if (include != null && include.contains("_")) {
-            String regex = setPattern(include);
+            String regex = setPattern(include, letters);
             p = Pattern.compile(regex);
             m = p.matcher("");
         }
@@ -274,11 +274,13 @@ public class DisplayExpandableResultFragment extends Fragment {
         return results;
     }
 
-    private String setPattern(String include) {
-        String regex;
+    private String setPattern(String include, String letters) {
+        String regex = include;
         // if the leading and trailing underscores were not redundant set the regex
         if (include.charAt(0) == '_' && include.charAt(include.length() - 1) == '_') {
-            regex = "\\w*" + include.replaceAll("^_+|_+$", "") + "\\w*";
+            if (letters.length() != include.length()) {
+                regex = "\\w*" + include.replaceAll("^_+|_+$", "") + "\\w*";
+            }
         }
         // if the expression starts with an underscore, want to find words that end with the
         // letters that come after the underscore
@@ -289,9 +291,6 @@ public class DisplayExpandableResultFragment extends Fragment {
         // letters that come before the underscore
         else if (include.charAt(include.length() - 1) == '_') {
             regex = "^" + include.replaceAll("^_+|_+$", "") + "\\w*";
-        }
-        else {
-            regex = include;
         }
         return regex.replace("_", ".");
     }
@@ -405,7 +404,6 @@ public class DisplayExpandableResultFragment extends Fragment {
             }
 
             if (!highlight) {
-                //word.clearSpans();
                 word = strippedWord;
             }
 
@@ -559,13 +557,5 @@ public class DisplayExpandableResultFragment extends Fragment {
                 ((LinearLayout) v).removeView(pb);
             }
         }
-
-        protected void onCancelled(ArrayList<Group> groups) {
-            Toast.makeText(callbacks.get().getApplicationContext(),
-                    getResources().getString(R.string.search_cancel),
-                    Toast.LENGTH_SHORT).show();
-        }
-
     }
-
 }
