@@ -544,9 +544,6 @@ public class DisplayExpandableResultFragment extends Fragment {
                     callbacks.get().reset();
                 } else {
                     if (getActivity() != null) {
-                        //adapter = new DisplayExpandableResultAdapter(
-                        //        getActivity().getApplicationContext(), groups);
-                        //lv.setAdapter(adapter);
                         adapter.notifyDataSetChanged();
                         if (groups.isEmpty()) {
                             TextView emptyView = (TextView) v.findViewById(R.id.emptyView);
