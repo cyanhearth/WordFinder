@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -19,7 +20,7 @@ public class LoadDictionaryFragment extends Fragment {
     private WeakReference<MainActivity> callbacks;
     private String currentDict;
 
-    public HashSet<String> words;
+    public ArrayList<String> words;
 
     public static LoadDictionaryFragment newInstance () {
         return new LoadDictionaryFragment();
@@ -34,7 +35,7 @@ public class LoadDictionaryFragment extends Fragment {
         return currentDict;
     }
 
-    public HashSet<String> getWords() {
+    public ArrayList<String> getWords() {
         return words;
     }
 
@@ -72,11 +73,11 @@ public class LoadDictionaryFragment extends Fragment {
     }
 
 
-    private class LoadDictionaryTask extends AsyncTask<String, Void, HashSet<String>> {
+    private class LoadDictionaryTask extends AsyncTask<String, Void, ArrayList<String>> {
 
         @Override
-        protected HashSet<String> doInBackground(String... res) {
-            words = new HashSet<>();
+        protected ArrayList<String> doInBackground(String... res) {
+            words = new ArrayList<>();
             int resourceId;
             switch (res[0]) {
                 case "SOWPODS":
@@ -114,7 +115,7 @@ public class LoadDictionaryFragment extends Fragment {
             return words;
         }
 
-        protected void onPostExecute(HashSet<String> args) {
+        protected void onPostExecute(ArrayList<String> args) {
             if (callbacks != null)
                 callbacks.get().setDictionary(args);
         }

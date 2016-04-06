@@ -176,6 +176,7 @@ public class DisplayExpandableResultFragment extends Fragment {
         Pattern p;
         Matcher m = null;
         int noOfBlanks = 0;
+        int lettersLength = letters.length();
         char[] blanks = null;
 
         // sort the letters we want to make words from
@@ -202,11 +203,12 @@ public class DisplayExpandableResultFragment extends Fragment {
         }
 
         for (String s : words) {
+            int wordLength = s.length();
             if (findWordsTask.isCancelled()) {
                 break;
             }
             // if the word contains too many (or too few) letters move onto the next one
-            if (s.length() > letters.length() || s.length() < minLength) continue;
+            if (wordLength > lettersLength || wordLength < minLength) continue;
             // if the include is set but is not contained in this word, move on
             if (include != null && !s.contains(include)) {
                 if (!include.contains("_")) {
@@ -227,7 +229,7 @@ public class DisplayExpandableResultFragment extends Fragment {
             // look for each of the search letters
             for (char c : sToChar) {
                 boolean found = false;
-                for (int j = n; j < lettersToChar.length; j++) {
+                for (int j = n; j < lettersLength; j++) {
                     // if the letter is found in the word, increment count
                     // and set n to the index we start searching for the next letter
                     if (c == lettersToChar[j]) {
@@ -248,7 +250,7 @@ public class DisplayExpandableResultFragment extends Fragment {
             // if the count equals the word length
             // and contains the substring (if it is set)
             // add it to the result
-            if ((s.length() >= count && s.length() <= count + noOfBlanks)) {
+            if ((wordLength >= count && wordLength <= count + noOfBlanks)) {
                 // if the pattern is set and the string does not contain it, continue
                 int end = -1;
                 int start = -1;
@@ -298,7 +300,8 @@ public class DisplayExpandableResultFragment extends Fragment {
     private String setHighlights(String s, String include, char[] blanks, int start, int end) {
         int blanksFound = 0;
         int charToCompare = include == null ? -1 : include.length() - 1;
-        for (int i = s.length() - 1; i >= 0; i--) {
+        int wordLength = s.length();
+        for (int i = wordLength - 1; i >= 0; i--) {
             // do not highlight letters included in a pattern
             if (i >= start  && i <= end) {
                 if (include != null && charToCompare >= 0) {

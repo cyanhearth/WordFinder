@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class MainActivity extends ActionBarActivity {
@@ -48,7 +49,7 @@ public class MainActivity extends ActionBarActivity {
     // Current network preference
     public static boolean wifiOnly;
 
-    public HashSet<String> words;
+    public ArrayList<String> words;
 
     private String includeWord;
 
@@ -413,8 +414,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     // LoadDictionaryFragment onPostExecute callback
-    public void setDictionary(HashSet<String> words) {
-
+    public void setDictionary(ArrayList<String> words) {
         this.words = words;
     }
 
