@@ -1,12 +1,13 @@
 package com.example.cyanhearth.wordfinder;
 
-import android.app.Activity;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -91,10 +92,12 @@ public class DisplayExpandableResultFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
-        callbacks = new WeakReference<>((MainActivity) activity);
+        if (context instanceof MainActivity) {
+            callbacks = new WeakReference<>((MainActivity) context);
+        }
 
     }
 
@@ -313,7 +316,7 @@ public class DisplayExpandableResultFragment extends Fragment {
             }
             for (int j = 0; j < blanks.length; j++) {
                 if (s.charAt(i) == blanks[j]) {
-                    s = s.substring(0, i) + "<font color='" + getResources().getColor(R.color.accent) + "'>" +
+                    s = s.substring(0, i) + "<font color='" + ContextCompat.getColor(callbacks.get(), R.color.accent) + "'>" +
                             s.charAt(i) + "</font>" + s.substring(i + 1);
                     blanks[j] = 0;
                     blanksFound++;
@@ -386,7 +389,7 @@ public class DisplayExpandableResultFragment extends Fragment {
         int groupId;
 
         for (String word : results) {
-            String strippedWord = word.replace("<font color='" + getResources().getColor(R.color.accent) + "'>", "");
+            String strippedWord = word.replace("<font color='" + ContextCompat.getColor(callbacks.get(), R.color.accent) + "'>", "");
             strippedWord = strippedWord.replace("</font>", "");
             int score = getScrabbleScore(strippedWord);
             switch (sortBy) {
@@ -508,10 +511,12 @@ public class DisplayExpandableResultFragment extends Fragment {
 
                     @Override
                     public int compare(String lhs, String rhs) {
-                        String strippedLeft = lhs.replace("<font color='" + getResources().getColor(R.color.accent) + "'>", "");
+                        String strippedLeft = lhs.replace("<font color='" +
+                                ContextCompat.getColor(callbacks.get(), R.color.accent) + "'>", "");
                         strippedLeft = strippedLeft.replace("</font>", "");
 
-                        String strippedRight = rhs.replace("<font color='" + getResources().getColor(R.color.accent) + "'>", "");
+                        String strippedRight = rhs.replace("<font color='" +
+                                ContextCompat.getColor(callbacks.get(), R.color.accent) + "'>", "");
                         strippedRight = strippedRight.replace("</font>", "");
 
                         int compare = strippedLeft.compareTo(strippedRight);

@@ -1,7 +1,7 @@
 package com.example.cyanhearth.wordfinder;
 
-import android.app.Activity;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * Created by cyanhearth on 26/08/2015.
@@ -50,9 +49,12 @@ public class LoadDictionaryFragment extends Fragment {
      * each configuration change.
      */
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        callbacks =  new WeakReference<>((MainActivity)activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (context instanceof MainActivity) {
+            callbacks = new WeakReference<>((MainActivity) context);
+        }
     }
 
     /**

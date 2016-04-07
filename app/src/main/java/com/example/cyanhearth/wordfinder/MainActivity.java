@@ -1,8 +1,8 @@
 package com.example.cyanhearth.wordfinder;
 
 import android.app.DialogFragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,8 +13,9 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,9 +24,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity{
     private static final String BASE_URI = "https://en.wiktionary.org/wiki/";
 
     private static final String STATE_LETTERS = "state_letters";
@@ -76,7 +76,7 @@ public class MainActivity extends ActionBarActivity {
         lettersInput = (TextView) findViewById(R.id.editText);
         includeTextView = (TextView) findViewById(R.id.textView);
 
-        final FragmentManager manager = getFragmentManager();
+        final FragmentManager manager = getSupportFragmentManager();
 
         // set up keyboard
         // Create the Keyboard
@@ -294,14 +294,6 @@ public class MainActivity extends ActionBarActivity {
                                 getResources().getString(R.string.include_no_letters),
                                 Toast.LENGTH_SHORT).show();
                     }
-                    /*else if (includeWord.length() - includeWord.replace("_", "")
-                            .length() > MAX_BLANKS_INCLUDE) {
-                        Toast.makeText(getApplicationContext(),
-                                String.format(getResources()
-                                        .getString(R.string.search_exceeds_wild),
-                                        MAX_BLANKS_INCLUDE),
-                                Toast.LENGTH_SHORT).show();
-                    }*/
                     else {
                         String text = String.format(
                                 getResources().getString(R.string.include_message), includeWord);
@@ -359,6 +351,11 @@ public class MainActivity extends ActionBarActivity {
             startActivity(settingsIntent);
             return true;
         }
+        if (id == R.id.action_help) {
+            Intent helpIntent = new Intent(this, HelpActivity.class);
+            startActivity(helpIntent);
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -374,11 +371,11 @@ public class MainActivity extends ActionBarActivity {
         String dict = preferences.getString(SettingsActivity.DICTIONARY_KEY, DEFAULT_DICTIONARY_STRING);
 
         String currentDictString = ((LoadDictionaryFragment)
-                getFragmentManager().findFragmentByTag(TAG_TASK_FRAGMENT)).getCurrentDict();
+                getSupportFragmentManager().findFragmentByTag(TAG_TASK_FRAGMENT)).getCurrentDict();
 
         if (!dict.equals(currentDictString)) {
 
-            FragmentManager manager = this.getFragmentManager();
+            FragmentManager manager = this.getSupportFragmentManager();
 
             LoadDictionaryFragment dictFragment = (LoadDictionaryFragment) manager.findFragmentByTag(TAG_TASK_FRAGMENT);
             dictFragment.setCurrentDict(dict);
@@ -425,7 +422,7 @@ public class MainActivity extends ActionBarActivity {
 
         if (wifiOnly && networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI
                 || !wifiOnly && networkInfo != null) {
-            word = word.replace("<font color='" + getResources().getColor(R.color.accent) + "'>", "");
+            word = word.replace("<font color='" + ContextCompat.getColor(this, R.color.accent) + "'>", "");
             word = word.replace("</font>", "");
             sendIntentForDefinition(word);
         }
@@ -436,13 +433,14 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void reset() {
-        DisplayExpandableResultFragment fragment = (DisplayExpandableResultFragment) getFragmentManager()
-                .findFragmentByTag(TAG_RESULTS_FRAGMENT);
+        DisplayExpandableResultFragment fragment =
+                (DisplayExpandableResultFragment) getSupportFragmentManager()
+                        .findFragmentByTag(TAG_RESULTS_FRAGMENT);
         if (fragment != null) {
             if (fragment.findWordsTask.getStatus() != AsyncTask.Status.FINISHED) {
                 fragment.findWordsTask.cancel(true);
             }
-            getFragmentManager().beginTransaction().remove(fragment).commit();
+            getSupportFragmentManager().beginTransaction().remove(fragment).commit();
         }
 
         keyboardView.setVisibility(View.VISIBLE);

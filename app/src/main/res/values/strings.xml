@@ -12,7 +12,7 @@
     <string name="enter_letters">Enter your letters…</string>
     <string name="include_message">Including \"%1$s\"</string>
     <string name="word_dialog_string">%1$s is in the current dictionary.\n\n
-        Would you like to find the definition?\n(Note: requires internet access)</string>
+        Would you like to find the definition?\n(requires network connection)</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>
     <string name="orderby_letters">letters</string>
@@ -29,7 +29,7 @@
     <!-- Toast message strings -->
     <string name="search_cancel">Search cancelled</string>
     <string name="orderby_error">Error retrieving order setting: using default setting (by length)</string>
-    <string name="network_error">Cannot retrieve definition: no network connection</string>
+    <string name="network_error">Allow the app to connect to a network to retrieve this definition</string>
 
     <string name="word_not_found">%1$s is not in the current dictionary</string>
     <string name="word_empty">Enter a word first</string>
@@ -40,5 +40,6 @@
     <string name="search_no_letters">Include some letters in your search</string>
     <string name="search_exceeds_wild">Use %1$d \'blanks\' or less in your search</string>
     <string name="search_exceeds_max">Enter %1$d letters or less</string>
+    <string name="title_activity_help">HelpActivity</string>
 
 </resources>
