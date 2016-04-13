@@ -2,9 +2,6 @@ package com.example.cyanhearth.wordfinder;
 
 import android.support.annotation.NonNull;
 
-/**
- * Created by cyanhearth on 16/02/2016.
- */
 public class Child implements Comparable<Child> {
 
     private String childName;

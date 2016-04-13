@@ -11,9 +11,7 @@ import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-/**
- * Created by cyanhearth on 26/08/2015.
- */
+
 public class LoadDictionaryFragment extends Fragment {
 
     private WeakReference<MainActivity> callbacks;
@@ -99,6 +97,10 @@ public class LoadDictionaryFragment extends Fragment {
                     break;
             }
 
+            if (!isAdded()) {
+                cancel(true);
+            }
+
             //read in dictionary
             BufferedReader st = new BufferedReader(new InputStreamReader(getResources()
                     .openRawResource(resourceId)));
@@ -118,8 +120,9 @@ public class LoadDictionaryFragment extends Fragment {
         }
 
         protected void onPostExecute(ArrayList<String> args) {
-            if (callbacks != null)
+            if (callbacks.get() != null) {
                 callbacks.get().setDictionary(args);
+            }
         }
     }
 }

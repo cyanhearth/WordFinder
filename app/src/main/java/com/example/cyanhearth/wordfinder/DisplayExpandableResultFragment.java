@@ -1,5 +1,6 @@
 package com.example.cyanhearth.wordfinder;
 
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -15,7 +16,6 @@ import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -25,9 +25,6 @@ import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by cyanhearth on 16/02/2016.
- */
 public class DisplayExpandableResultFragment extends Fragment {
 
     private static final String STATE_HIGHLIGHT = "state_highlight";
@@ -404,9 +401,9 @@ public class DisplayExpandableResultFragment extends Fragment {
                     break;
                 default:
                     groupId = strippedWord.length();
-                    Toast.makeText(callbacks.get(),
+                    Snackbar.make(v,
                             getResources().getString(R.string.orderby_error),
-                            Toast.LENGTH_SHORT).show();
+                            Snackbar.LENGTH_SHORT).show();
             }
 
             if (!highlight) {
@@ -476,7 +473,7 @@ public class DisplayExpandableResultFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            if (callbacks != null) {
+            if (callbacks.get() != null) {
                 pb = new ProgressBar(callbacks.get().getApplicationContext(), null,
                         android.R.attr.progressBarStyleHorizontal);
                 pb.setIndeterminate(true);
@@ -535,7 +532,7 @@ public class DisplayExpandableResultFragment extends Fragment {
             }
 
             rawResults = results;
-            if (callbacks != null) {
+            if (callbacks.get() != null) {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(callbacks.get());
                 String orderBy = prefs.getString(ORDER_KEY, ORDER_DEFAULT);
 
@@ -547,7 +544,7 @@ public class DisplayExpandableResultFragment extends Fragment {
         protected void onPostExecute(ArrayList<Group> groups) {
             // if upon trying to restore the fragments previous state the wordlist is null, reset
             // the app to it's starting conditions
-            if (callbacks != null) {
+            if (callbacks.get() != null) {
                 if (groups == null) {
                     callbacks.get().reset();
                 } else {

@@ -10,9 +10,7 @@ import android.preference.PreferenceManager;
 
 import java.util.Set;
 
-/**
- * Created by cyanhearth on 02/09/2015.
- */
+
 public class SettingsActivity extends PreferenceActivity {
 
     public static final String DICTIONARY_KEY = "dictionary";

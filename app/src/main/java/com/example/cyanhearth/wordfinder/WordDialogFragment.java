@@ -6,9 +6,7 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
-/**
- * Created by cyanhearth on 26/08/2015.
- */
+
 public class WordDialogFragment extends DialogFragment {
 
     private String word;

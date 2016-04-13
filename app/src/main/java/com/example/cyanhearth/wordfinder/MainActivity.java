@@ -1,6 +1,7 @@
 package com.example.cyanhearth.wordfinder;
 
 import android.app.DialogFragment;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
@@ -21,7 +22,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -85,58 +85,60 @@ public class MainActivity extends AppCompatActivity{
         // Lookup the KeyboardView
         keyboardView = (KeyboardView) findViewById(R.id.keyboardview);
         // Attach the keyboard to the view
-        keyboardView.setKeyboard(keyboard);
+        if (keyboardView != null) {
+            keyboardView.setKeyboard(keyboard);
 
-        // Do not show the preview balloons
-        keyboardView.setPreviewEnabled(false);
+            // Do not show the preview balloons
+            keyboardView.setPreviewEnabled(false);
 
-        // Install the key handler
-        keyboardView.setOnKeyboardActionListener(new KeyboardView.OnKeyboardActionListener() {
-            @Override
-            public void onKey(int primaryCode, int[] keyCodes) {
-                //Here find the primaryCode to see which key is pressed
-                //based on the android:codes property
-                String inputText = lettersInput.getText().toString();
-                if (primaryCode == -1 && !inputText.equals("")) {
-                    inputText = inputText.substring(0, inputText.length() - 1);
-                    lettersInput.setText(inputText);
-                }
-                if (primaryCode != -1) {
-                    if (inputText.length() < MAX_LETTERS) {
-                        inputText += String.valueOf((char) primaryCode);
+            // Install the key handler
+            keyboardView.setOnKeyboardActionListener(new KeyboardView.OnKeyboardActionListener() {
+                @Override
+                public void onKey(int primaryCode, int[] keyCodes) {
+                    //Here find the primaryCode to see which key is pressed
+                    //based on the android:codes property
+                    String inputText = lettersInput.getText().toString();
+                    if (primaryCode == -1 && !inputText.equals("")) {
+                        inputText = inputText.substring(0, inputText.length() - 1);
                         lettersInput.setText(inputText);
                     }
+                    if (primaryCode != -1) {
+                        if (inputText.length() < MAX_LETTERS) {
+                            inputText += String.valueOf((char) primaryCode);
+                            lettersInput.setText(inputText);
+                        }
+                    }
                 }
-            }
 
-            @Override
-            public void onPress(int arg0) {
-            }
+                @Override
+                public void onPress(int arg0) {
+                }
 
-            @Override
-            public void onRelease(int primaryCode) {
-            }
+                @Override
+                public void onRelease(int primaryCode) {
+                }
 
-            @Override
-            public void onText(CharSequence text) {
-            }
+                @Override
+                public void onText(CharSequence text) {
+                }
 
-            @Override
-            public void swipeDown() {
-            }
+                @Override
+                public void swipeDown() {
+                }
 
-            @Override
-            public void swipeLeft() {
-            }
+                @Override
+                public void swipeLeft() {
+                }
 
-            @Override
-            public void swipeRight() {
-            }
+                @Override
+                public void swipeRight() {
+                }
 
-            @Override
-            public void swipeUp() {
-            }
-        });
+                @Override
+                public void swipeUp() {
+                }
+            });
+        }
 
 
         // restore state
@@ -172,143 +174,144 @@ public class MainActivity extends AppCompatActivity{
 
 
         // set "Search" button function
-        search.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String letters = lettersInput.getText().toString();
-                if (letters.equals("") && (includeWord == null || includeWord.equals(""))) {
-                    Toast.makeText(MainActivity.this,
-                            String.format(getResources()
-                                    .getString(R.string.search_empty),
-                                    MAX_LETTERS),
-                            Toast.LENGTH_SHORT).show();
-                }
-                else if (letters.matches("^_+$")) {
-                    Toast.makeText(getApplicationContext(),
-                            getResources().getString(R.string.search_no_letters),
-                            Toast.LENGTH_SHORT).show();
-                }
-                else if (letters.length() - letters.replace("_", "").length() > MAX_BLANKS_SEARCH){
-                    Toast.makeText(MainActivity.this,
-                            String.format(getResources()
-                                    .getString(R.string.search_exceeds_wild),
-                                    MAX_BLANKS_SEARCH),
-                            Toast.LENGTH_SHORT).show();
-                }
-                else if (letters.length() > MAX_LETTERS) {
-                    Toast.makeText(MainActivity.this,
-                            String.format(getResources()
-                                    .getString(R.string.search_exceeds_max),
-                                    MAX_LETTERS),
-                            Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    DisplayExpandableResultFragment fragment = DisplayExpandableResultFragment.newInstance();
-                    Bundle args = new Bundle();
-                    if (letters.equals("")) {
-                        for (int i = 0; i < includeWord.length(); i++) {
-                            if (includeWord.charAt(i) == '_') {
-                                letters += "_";
+        if (search != null) {
+            search.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String letters = lettersInput.getText().toString();
+                    if (letters.equals("") && (includeWord == null || includeWord.equals(""))) {
+                        Snackbar.make(v,
+                                String.format(getResources()
+                                                .getString(R.string.search_empty),
+                                        MAX_LETTERS),
+                                Snackbar.LENGTH_SHORT).show();
+                    } else if (letters.matches("^_+$")) {
+                        Snackbar.make(v,
+                                getResources().getString(R.string.search_no_letters),
+                                Snackbar.LENGTH_SHORT).show();
+                    } else if (letters.length() - letters.replace("_", "").length() > MAX_BLANKS_SEARCH) {
+                        Snackbar.make(v,
+                                String.format(getResources()
+                                                .getString(R.string.search_exceeds_wild),
+                                        MAX_BLANKS_SEARCH),
+                                Snackbar.LENGTH_SHORT).show();
+                    } else if (letters.length() > MAX_LETTERS) {
+                        Snackbar.make(v,
+                                String.format(getResources()
+                                                .getString(R.string.search_exceeds_max),
+                                        MAX_LETTERS),
+                                Snackbar.LENGTH_SHORT).show();
+                    } else {
+                        DisplayExpandableResultFragment fragment = DisplayExpandableResultFragment.newInstance();
+                        Bundle args = new Bundle();
+                        if (letters.equals("")) {
+                            for (int i = 0; i < includeWord.length(); i++) {
+                                if (includeWord.charAt(i) == '_') {
+                                    letters += "_";
+                                }
                             }
                         }
-                    }
-                    args.putString(LETTERS_KEY, letters);
-                    args.putString(INCLUDE_KEY, includeWord);
-                    fragment.setArguments(args);
-                    manager.beginTransaction()
-                            .replace(R.id.fragment_container,
-                                    fragment,
-                                    TAG_RESULTS_FRAGMENT).commit();
+                        args.putString(LETTERS_KEY, letters);
+                        args.putString(INCLUDE_KEY, includeWord);
+                        fragment.setArguments(args);
+                        manager.beginTransaction()
+                                .replace(R.id.fragment_container,
+                                        fragment,
+                                        TAG_RESULTS_FRAGMENT).commit();
 
-                    includeWord = null;
-                    keyboardView.setVisibility(View.GONE);
+                        includeWord = null;
+                        keyboardView.setVisibility(View.GONE);
+                    }
                 }
-            }
-        });
+            });
+        }
 
         // set "Define" button function
-        define.setOnClickListener(new View.OnClickListener() {
+        if (define != null) {
+            define.setOnClickListener(new View.OnClickListener() {
 
-            @Override
-            public void onClick(View v) {
-                String currentWord = lettersInput.getText().toString();
-                if (isValidWord(currentWord)) {
-                    ConnectivityManager conn = (ConnectivityManager)
-                            getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-                    NetworkInfo networkInfo = conn.getActiveNetworkInfo();
+                @Override
+                public void onClick(View v) {
+                    String currentWord = lettersInput.getText().toString();
+                    if (isValidWord(currentWord)) {
+                        ConnectivityManager conn = (ConnectivityManager)
+                                getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+                        NetworkInfo networkInfo = conn.getActiveNetworkInfo();
 
-                    if (wifiOnly && networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI
-                            || !wifiOnly && networkInfo != null) {
-                        DialogFragment frag = WordDialogFragment.newInstance();
-                        Bundle args = new Bundle();
-                        args.putString(LETTERS_KEY, currentWord);
-                        frag.setArguments(args);
-                        frag.show(getFragmentManager(), TAG_DIALOG);
+                        if (wifiOnly && networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI
+                                || !wifiOnly && networkInfo != null) {
+                            DialogFragment frag = WordDialogFragment.newInstance();
+                            Bundle args = new Bundle();
+                            args.putString(LETTERS_KEY, currentWord);
+                            frag.setArguments(args);
+                            frag.show(getFragmentManager(), TAG_DIALOG);
+                        } else {
+                            Snackbar.make(v,
+                                    getResources().getString(R.string.network_error),
+                                    Snackbar.LENGTH_SHORT).show();
+                        }
+
+                    } else if (!currentWord.equals("")) {
+                        Snackbar.make(v,
+                                String.format(getResources()
+                                                .getString(R.string.word_not_found),
+                                        currentWord),
+                                Snackbar.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(getApplicationContext(),
-                                getResources().getString(R.string.network_error),
-                                Toast.LENGTH_LONG).show();
+                        Snackbar.make(v,
+                                getResources().getString(R.string.word_empty),
+                                Snackbar.LENGTH_SHORT).show();
                     }
-
-                } else if (!currentWord.equals("")) {
-                    Toast.makeText(getApplicationContext(),
-                            String.format(getResources()
-                                    .getString(R.string.word_not_found),
-                                    currentWord),
-                            Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(getApplicationContext(),
-                            getResources().getString(R.string.word_empty),
-                            Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
+            });
+        }
 
         // reset the activity
-        clear.setOnClickListener(new View.OnClickListener() {
+        if (clear != null) {
+            clear.setOnClickListener(new View.OnClickListener() {
 
-            @Override
-            public void onClick(View v) {
-                reset();
-            }
-        });
+                @Override
+                public void onClick(View v) {
+                    reset();
+                }
+            });
+        }
 
         // set the "Include" button function
-        include.setOnClickListener(new View.OnClickListener() {
-;
-            @Override
-            public void onClick(View v) {
+        if (include != null) {
+            include.setOnClickListener(new View.OnClickListener() {
+                ;
 
-                includeWord = lettersInput.getText().toString();
+                @Override
+                public void onClick(View v) {
 
-                if (includeWord.length() > 0) {
-                    if (includeWord.length() > MAX_LETTERS) {
-                        Toast.makeText(getApplicationContext(),
-                                String.format(getResources()
-                                        .getString(R.string.search_exceeds_max),
-                                        MAX_LETTERS),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                    else if (includeWord.matches("^_+$")) {
-                        Toast.makeText(getApplicationContext(),
-                                getResources().getString(R.string.include_no_letters),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                    else {
-                        String text = String.format(
-                                getResources().getString(R.string.include_message), includeWord);
-                        includeTextView.setText(text);
-                        lettersInput.setText("");
+                    includeWord = lettersInput.getText().toString();
+
+                    if (includeWord.length() > 0) {
+                        if (includeWord.length() > MAX_LETTERS) {
+                            Snackbar.make(v,
+                                    String.format(getResources()
+                                                    .getString(R.string.search_exceeds_max),
+                                            MAX_LETTERS),
+                                    Snackbar.LENGTH_SHORT).show();
+                        } else if (includeWord.matches("^_+$")) {
+                            Snackbar.make(v,
+                                    getResources().getString(R.string.include_no_letters),
+                                    Snackbar.LENGTH_SHORT).show();
+                        } else {
+                            String text = String.format(
+                                    getResources().getString(R.string.include_message), includeWord);
+                            includeTextView.setText(text);
+                            lettersInput.setText("");
+                        }
+                    } else {
+                        Snackbar.make(v,
+                                getResources().getString(R.string.include_empty),
+                                Snackbar.LENGTH_SHORT).show();
                     }
                 }
-
-                else {
-                    Toast.makeText(getApplicationContext(),
-                            getResources().getString(R.string.include_empty),
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+            });
+        }
     }
 
     public void sendIntentForDefinition(String word) {
@@ -427,8 +430,11 @@ public class MainActivity extends AppCompatActivity{
             sendIntentForDefinition(word);
         }
         else {
-            Toast.makeText(this, getResources().getString(R.string.network_error),
-                    Toast.LENGTH_LONG).show();
+            View v = findViewById(R.id.expandableListView);
+            if (v != null) {
+                Snackbar.make(v, getResources().getString(R.string.network_error),
+                        Snackbar.LENGTH_LONG).show();
+            }
         }
     }
 
