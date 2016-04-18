@@ -425,8 +425,6 @@ public class MainActivity extends AppCompatActivity{
 
         if (wifiOnly && networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI
                 || !wifiOnly && networkInfo != null) {
-            word = word.replace("<font color='" + ContextCompat.getColor(this, R.color.accent) + "'>", "");
-            word = word.replace("</font>", "");
             sendIntentForDefinition(word);
         }
         else {

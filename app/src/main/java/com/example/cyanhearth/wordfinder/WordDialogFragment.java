@@ -10,6 +10,7 @@ import android.os.Bundle;
 public class WordDialogFragment extends DialogFragment {
 
     private String word;
+    private int score;
 
     public static WordDialogFragment newInstance() {
         return new WordDialogFragment();
@@ -17,9 +18,11 @@ public class WordDialogFragment extends DialogFragment {
 
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         word = getArguments().getString(MainActivity.LETTERS_KEY);
+        score = DisplayExpandableResultFragment.getScrabbleScore(word, null);
 
         return new AlertDialog.Builder(getActivity())
-                .setMessage(String.format(getResources().getString(R.string.word_dialog_string), word))
+                .setMessage(String.format(getResources().getString(R.string.word_dialog_string)
+                        , word, score))
                 .setCancelable(false)
                 .setNegativeButton(getResources().getString(R.string.no),
                         new DialogInterface.OnClickListener() {

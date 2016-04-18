@@ -39,7 +39,7 @@ public class DisplayExpandableResultFragment extends Fragment {
 
     private ProgressBar pb;
 
-    private ArrayList<String> rawResults;
+    private ArrayList<Child> rawResults;
     private ArrayList<Group> groups;
     private String include;
     private String letters;
@@ -104,14 +104,14 @@ public class DisplayExpandableResultFragment extends Fragment {
         v = inflater.inflate(R.layout.expandable_fragment, container, false);
         lv = (ExpandableListView)v.findViewById(R.id.expandableListView);
 
-        adapter = new DisplayExpandableResultAdapter(getActivity().getApplicationContext(), groups);
+        adapter = new DisplayExpandableResultAdapter(getActivity().getApplicationContext(), groups, currentHighlight);
         lv.setAdapter(adapter);
 
         lv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 callbacks.get().onExpandableItemSelected(((Child) (parent.getExpandableListAdapter()
-                        .getChild(groupPosition, childPosition))).getChildName());
+                        .getChild(groupPosition, childPosition))).getChildStrippedName());
                 return true;
             }
         });
@@ -142,17 +142,20 @@ public class DisplayExpandableResultFragment extends Fragment {
             currentSortBy = sortBy;
         }
         else {
-            if ((!sortBy.equals(currentSortBy) || currentHighlight != highlight)
+            if (highlight != currentHighlight) {
+                currentHighlight = highlight;
+                adapter.notifyDataSetChanged(currentHighlight);
+            }
+            if ((!sortBy.equals(currentSortBy))
                     && findWordsTask.getStatus() != AsyncTask.Status.RUNNING) {
                 currentSortBy = sortBy;
-                currentHighlight = highlight;
 
                 final Handler handler = new Handler();
 
                 Runnable sortRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        ArrayList<Group> temp = sortResults(rawResults, currentSortBy, currentHighlight);
+                        ArrayList<Group> temp = sortResults(rawResults, currentSortBy);
                         groups.clear();
                         groups.addAll(temp);
 
@@ -170,9 +173,9 @@ public class DisplayExpandableResultFragment extends Fragment {
         }
     }
 
-    public ArrayList<String> possibleWords(String letters, Iterable<String> words, int minLength, String include) {
+    public ArrayList<Child> possibleWords(String letters, Iterable<String> words, int minLength, String include) {
         // hold results
-        ArrayList<String> results = new ArrayList<>();
+        ArrayList<Child> results = new ArrayList<>();
         Pattern p;
         Matcher m = null;
         int noOfBlanks = 0;
@@ -267,10 +270,13 @@ public class DisplayExpandableResultFragment extends Fragment {
                     }
                 }
 
+                String highlightedWord = s;
+                int score = getScrabbleScore(s, blanks);
                 if (noOfBlanks > 0) {
-                    s = setHighlights(s, include, blanks, start, end);
+
+                    highlightedWord = setHighlights(s, include, blanks, start, end);
                 }
-                results.add(s);
+                results.add(new Child(highlightedWord, s, score));
             }
         }
         return results;
@@ -327,40 +333,36 @@ public class DisplayExpandableResultFragment extends Fragment {
         return s;
     }
 
-    public int getScrabbleScore(String word) {
-        int score = 0;
-
-        for (int i = 0; i < word.length(); i++) {
-            char c = word.charAt(i);
-
+    public static int getLetterValue(char c) {
+        int value;
             switch (c) {
                 case 'd':
                 case 'g':
-                    score += 2;
+                    value = 2;
                     break;
                 case 'b':
                 case 'c':
                 case 'm':
                 case 'p':
-                    score += 3;
+                    value = 3;
                     break;
                 case 'f':
                 case 'h':
                 case 'v':
                 case 'w':
                 case 'y':
-                    score += 4;
+                    value = 4;
                     break;
                 case 'k':
-                    score += 5;
+                    value = 5;
                     break;
                 case 'j':
                 case 'x':
-                    score+= 8;
+                    value = 8;
                     break;
                 case 'q':
                 case 'z':
-                    score += 10;
+                    value = 10;
                     break;
                 case 'a':
                 case 'e':
@@ -372,49 +374,61 @@ public class DisplayExpandableResultFragment extends Fragment {
                 case 's':
                 case 't':
                 case 'u':
-                    score += 1;
+                    value = 1;
                     break;
                 default:
-                    break;
+                    value = 0;
+            }
+        return value;
+    }
+
+    public static int getScrabbleScore(String word, char[] blanks) {
+        int score = 0;
+
+        if (blanks != null) {
+            for (char c : blanks) {
+                score -= getLetterValue(c);
             }
         }
+
+        for (int i = 0; i < word.length(); i++) {
+            char c = word.charAt(i);
+
+            score += getLetterValue(c);
+        }
+
         return score;
     }
 
-    public ArrayList<Group> sortResults(ArrayList<String> results, String sortBy, boolean highlight) {
+    public ArrayList<Group> sortResults(ArrayList<Child> results, String sortBy) {
         ArrayList<Group> groups = new ArrayList<>();
         int groupId;
 
-        for (String word : results) {
-            String strippedWord = word.replace("<font color='" + ContextCompat.getColor(callbacks.get(), R.color.accent) + "'>", "");
-            strippedWord = strippedWord.replace("</font>", "");
-            int score = getScrabbleScore(strippedWord);
+        for (Child child : results) {
+            String word = child.getChildStrippedName();
+            int score = child.getChildScore();
             switch (sortBy) {
                 case "0":
-                    groupId = strippedWord.charAt(0);
+                    groupId = word.charAt(0);
                     break;
                 case "1":
-                    groupId = strippedWord.length();
+                    groupId = word.length();
                     break;
                 case "2":
                     groupId = score;
                     break;
                 default:
-                    groupId = strippedWord.length();
+                    groupId = word.length();
                     Snackbar.make(v,
                             getResources().getString(R.string.orderby_error),
                             Snackbar.LENGTH_SHORT).show();
-            }
-
-            if (!highlight) {
-                word = strippedWord;
             }
 
             boolean groupExists = false;
 
             for (Group group : groups) {
                 if (group.getGroupId() == groupId) {
-                    group.addChild(new Child(word, score));
+                    group.addChild(child);
                     groupExists = true;
                     break;
                 }
@@ -442,7 +456,7 @@ public class DisplayExpandableResultFragment extends Fragment {
 
                 Group group = new Group(groupId);
                 group.setGroupName(groupName);
-                group.addChild(new Child(word, score));
+                group.addChild(child);
                 groups.add(group);
             }
         }
@@ -495,7 +509,7 @@ public class DisplayExpandableResultFragment extends Fragment {
                 minLetters = allLetters.length();
             }
 
-            ArrayList<String> results = null;
+            ArrayList<Child> results = null;
 
             Iterable<String> words = callbacks.get().words;
 
@@ -504,17 +518,13 @@ public class DisplayExpandableResultFragment extends Fragment {
                         minLetters, include);
 
                 // sort alphabetically
-                Collections.sort(results, new Comparator<String>() {
+                Collections.sort(results, new Comparator<Child>() {
 
                     @Override
-                    public int compare(String lhs, String rhs) {
-                        String strippedLeft = lhs.replace("<font color='" +
-                                ContextCompat.getColor(callbacks.get(), R.color.accent) + "'>", "");
-                        strippedLeft = strippedLeft.replace("</font>", "");
+                    public int compare(Child lhs, Child rhs) {
+                        String strippedLeft = lhs.getChildStrippedName();
 
-                        String strippedRight = rhs.replace("<font color='" +
-                                ContextCompat.getColor(callbacks.get(), R.color.accent) + "'>", "");
-                        strippedRight = strippedRight.replace("</font>", "");
+                        String strippedRight = rhs.getChildStrippedName();
 
                         int compare = strippedLeft.compareTo(strippedRight);
 
@@ -536,7 +546,7 @@ public class DisplayExpandableResultFragment extends Fragment {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(callbacks.get());
                 String orderBy = prefs.getString(ORDER_KEY, ORDER_DEFAULT);
 
-                groups.addAll(sortResults(results, orderBy, currentHighlight));
+                groups.addAll(sortResults(results, orderBy));
             }
             return groups;
         }

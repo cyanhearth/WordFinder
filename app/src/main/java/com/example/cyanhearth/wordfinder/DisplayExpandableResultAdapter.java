@@ -13,10 +13,12 @@ import java.util.ArrayList;
 public class DisplayExpandableResultAdapter extends BaseExpandableListAdapter {
 
     private ArrayList<Group> groups;
+    private boolean highlight;
     private LayoutInflater inflater;
 
-    public DisplayExpandableResultAdapter(Context context,ArrayList<Group> groups) {
+    public DisplayExpandableResultAdapter(Context context,ArrayList<Group> groups, boolean highlight) {
         this.groups = groups;
+        this.highlight = highlight;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -100,7 +102,8 @@ public class DisplayExpandableResultAdapter extends BaseExpandableListAdapter {
 
         // update the child item view
         Child child = getChild(groupPosition,childPosition);
-        childHolder.childTextView.setText(Html.fromHtml(child.getChildName()));
+        String text = highlight ? child.getChildName() : child.getChildStrippedName();
+        childHolder.childTextView.setText(Html.fromHtml(text));
 
         String score = String.valueOf(child.getChildScore());
 
@@ -108,6 +111,7 @@ public class DisplayExpandableResultAdapter extends BaseExpandableListAdapter {
 
         return convertView;
     }
+
 
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
@@ -122,5 +126,10 @@ public class DisplayExpandableResultAdapter extends BaseExpandableListAdapter {
     private static class ChildHolder {
         TextView childTextView;
         TextView childScoreView;
+    }
+
+    public void notifyDataSetChanged(Boolean highlight) {
+        this.highlight = highlight;
+        super.notifyDataSetChanged();
     }
 }

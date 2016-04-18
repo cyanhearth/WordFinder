@@ -5,16 +5,18 @@ import android.support.annotation.NonNull;
 public class Child implements Comparable<Child> {
 
     private String childName;
+    private String childStrippedName;
     private int childScore;
 
-    public Child(String childName, int childScore) {
+    public Child(String childName, String childStrippedName, int childScore) {
         this.childName = childName;
+        this.childStrippedName = childStrippedName;
         this.childScore = childScore;
     }
 
     @Override
     public int compareTo(@NonNull Child another) {
-        int compare = this.childName.compareTo(another.getChildName());
+        int compare = this.childStrippedName.compareTo(another.getChildName());
         if (compare > 0) {
             return 1;
         }
@@ -31,6 +33,10 @@ public class Child implements Comparable<Child> {
         return childName;
     }
 
+    public String getChildStrippedName() {
+        return childStrippedName;
+    }
+
     public int getChildScore()
     {
         return childScore;
@@ -39,6 +45,10 @@ public class Child implements Comparable<Child> {
     //setters
     public void setChildName(String childName) {
         this.childName = childName;
+    }
+
+    public void setChildStrippedName(String childStrippedName) {
+        this.childStrippedName = childStrippedName;
     }
 
     public void setChildScore(int childScore) {
