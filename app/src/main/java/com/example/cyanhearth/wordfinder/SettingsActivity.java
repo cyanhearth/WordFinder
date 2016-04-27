@@ -7,11 +7,13 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 
 import java.util.Set;
 
 
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends AppCompatActivity {
 
     public static final String DICTIONARY_KEY = "dictionary";
     public static final String MIN_LENGTH_KEY = "word_length";
@@ -20,6 +22,11 @@ public class SettingsActivity extends PreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         // Display the fragment as the main content.
         getFragmentManager().beginTransaction()

@@ -95,7 +95,7 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:text="@string/include"
+            android:text="@string/button_include"
             android:textColor="#FFFFFF"
             android:background="@drawable/keybackground"
             android:id="@+id/button4"
@@ -106,7 +106,7 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:text="@string/clear"
+            android:text="@string/button_clear"
             android:textColor="#FFFFFF"
             android:background="@drawable/keybackground"
             android:padding="20dp"

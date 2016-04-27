@@ -59,7 +59,7 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:text="@string/include"
+            android:text="@string/button_include"
             android:id="@+id/button4"
             android:textColor="#FFFFFF"
             android:backgroundTint="@color/primary_light"
@@ -70,7 +70,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="@string/clear"
+            android:text="@string/button_clear"
             android:textColor="#FFFFFF"
             android:backgroundTint="@color/primary_light"
             android:id="@+id/button3" />

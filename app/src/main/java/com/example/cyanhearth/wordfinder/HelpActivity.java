@@ -1,6 +1,7 @@
 package com.example.cyanhearth.wordfinder;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -9,10 +10,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -21,12 +24,19 @@ public class HelpActivity extends AppCompatActivity {
     ViewPager viewPager;
     MyPagerAdapter adapter;
 
+    private static final String HELP_KEY = "help";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_help);
 
         setTitle("Help");
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         // create floating action button
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -46,8 +56,8 @@ public class HelpActivity extends AppCompatActivity {
 
         // create swipe views
         adapter = new MyPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new DemoFragment(), "How To Use");
-        adapter.addFragment(new DemoFragment(), "Examples");
+
+        setFragments();
 
         viewPager = (ViewPager) findViewById(R.id.pager);
         if (viewPager != null) {
@@ -61,14 +71,56 @@ public class HelpActivity extends AppCompatActivity {
 
     }
 
-    public static class DemoFragment extends Fragment {
+    private void setFragments() {
+        Resources resources = getResources();
+
+        HelpFragment searchHelpFragment = new HelpFragment();
+        Bundle searchArgs = new Bundle();
+        searchArgs.putString(HELP_KEY, resources.getString(R.string.help_search));
+        searchHelpFragment.setArguments(searchArgs);
+
+        HelpFragment defineHelpFragment = new HelpFragment();
+        Bundle defineArgs = new Bundle();
+        defineArgs.putString(HELP_KEY, resources.getString(R.string.help_define));
+        defineHelpFragment.setArguments(defineArgs);
+
+        HelpFragment includeHelpFragment = new HelpFragment();
+        Bundle includeArgs = new Bundle();
+        includeArgs.putString(HELP_KEY, resources.getString(R.string.help_include));
+        includeHelpFragment.setArguments(includeArgs);
+
+        HelpFragment settingsHelpFragment = new HelpFragment();
+        Bundle settingsArgs = new Bundle();
+        settingsArgs.putString(HELP_KEY, resources.getString(R.string.help_settings));
+        settingsHelpFragment.setArguments(settingsArgs);
+
+        adapter.addFragment(searchHelpFragment, resources.getString(R.string.button_search));
+        adapter.addFragment(defineHelpFragment, resources.getString(R.string.button_define));
+        adapter.addFragment(includeHelpFragment, resources.getString(R.string.button_include));
+        adapter.addFragment(settingsHelpFragment, resources.getString(R.string.action_settings));
+    }
+
+
+    public static class HelpFragment extends Fragment {
+
+        TextView textView;
+        String text;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.demo_fragment, container, false);
+            View v = inflater.inflate(R.layout.help_fragment, container, false);
+            textView = (TextView) v.findViewById(R.id.helpTextView);
+            textView.setText(text);
             return v;
 
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            text = getArguments().getString(HELP_KEY);
         }
 
     }

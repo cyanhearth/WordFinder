@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory android:title="Settings">
     <ListPreference
         android:title="Dictionary"
         android:key="dictionary"
@@ -24,14 +23,13 @@
 
     <SwitchPreference
         android:title="Highlighting"
-        android:summary="Toggle highlighting of results returned from 'blank' letters"
+        android:summary="@string/highlight_summary"
         android:key="highlight"
         android:defaultValue="true" />
 
     <SwitchPreference
         android:title="Wifi only"
-        android:summary="Choose whether or not to restrict fetching web definitions to wifi only"
+        android:summary="@string/wifi_summary"
         android:key="wifi_only"
         android:defaultValue="true" />
-    </PreferenceCategory>
 </PreferenceScreen>

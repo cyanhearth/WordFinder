@@ -70,7 +70,7 @@
             <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/include"
+                android:text="@string/button_include"
                 android:textColor="#FFFFFF"
                 android:backgroundTint="@color/primary_light"
                 android:id="@+id/button4"
@@ -82,7 +82,7 @@
             <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/clear"
+                android:text="@string/button_clear"
                 android:textColor="#FFFFFF"
                 android:backgroundTint="@color/primary_light"
                 android:padding="20dp"
