@@ -21,8 +21,7 @@
             android:id="@+id/editText"
             android:hint="@string/enter_letters"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:paddingTop="10dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
             android:gravity="center_horizontal"
             android:layout_gravity="center_horizontal|top"
             android:textSize="30sp" />
@@ -32,7 +31,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:id="@+id/textView"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
             android:layout_gravity="center_horizontal"
             android:clickable="false"/>
 

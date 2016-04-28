@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WordFinder</string>
+    <string name="app_name">Word Finder</string>
 
     <!-- button text -->
     <string name="button_search">Search</string>

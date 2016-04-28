@@ -1,10 +1,13 @@
 package com.example.cyanhearth.wordfinder;
 
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -48,8 +51,7 @@ public class HelpActivity extends AppCompatActivity {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     Uri uri = Uri.parse("mailto:cyanhearth@gmail.com?subject=WordFinder%20App");
                     intent.setData(uri);
-                    startActivity(intent);
-
+                        startActivity(intent);
                 }
             });
         }

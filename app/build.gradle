@@ -5,8 +5,8 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        applicationId "com.example.cyanhearth.wordfinder"
-        minSdkVersion 15
+        applicationId "com.app.cyanhearth.wordfinder"
+        minSdkVersion 14
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"

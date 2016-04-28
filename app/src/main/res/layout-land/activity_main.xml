@@ -23,8 +23,7 @@
             android:id="@+id/editText"
             android:hint="@string/enter_letters"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:paddingTop="10dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
             android:gravity="center_horizontal"
             android:layout_gravity="center_horizontal|top"
             android:textSize="30sp" />
@@ -34,7 +33,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:id="@+id/textView"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
             android:layout_gravity="center_horizontal"
             android:clickable="false"/>
 
@@ -75,7 +74,6 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:layout_marginBottom="10dp"
-            android:padding="20dp"
             android:textColor="#FFFFFF"
             android:background="@drawable/keybackground"
             android:text="@string/button_search"
@@ -86,7 +84,6 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:layout_marginBottom="10dp"
-            android:padding="20dp"
             android:textColor="#FFFFFF"
             android:background="@drawable/keybackground"
             android:text="@string/button_define"
@@ -100,7 +97,6 @@
             android:background="@drawable/keybackground"
             android:id="@+id/button4"
             android:layout_marginBottom="10dp"
-            android:padding="20dp"
             android:layout_weight="1" />
 
         <Button
@@ -109,7 +105,6 @@
             android:text="@string/button_clear"
             android:textColor="#FFFFFF"
             android:background="@drawable/keybackground"
-            android:padding="20dp"
             android:id="@+id/button3"
             android:layout_weight="1" />
 

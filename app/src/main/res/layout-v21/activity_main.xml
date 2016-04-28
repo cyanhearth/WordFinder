@@ -31,7 +31,6 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:padding="20dp"
             android:text="@string/button_search"
             android:backgroundTint="@color/primary_light"
             android:textColor="#FFFFFF"
@@ -63,7 +62,6 @@
             android:id="@+id/button4"
             android:textColor="#FFFFFF"
             android:backgroundTint="@color/primary_light"
-            android:padding="20dp"
             android:layout_weight="1" />
 
         <Button
