@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="dictionaries">
-        <item>SOWPODS (International English)</item>
-        <item>OSPD (US English)</item>
-        <item>CSW15 (UK English)</item>
-        <item>ENABLE1</item>
+        <item>SOWPODS (International English, Scrabble)</item>
+        <item>OSPD (US English, Scrabble)</item>
+        <item>CSW15 (UK English, Scrabble)</item>
+        <item>ENABLE1 (Words with Friends)</item>
     </string-array>
 
     <string-array name="dictionaries_values">
