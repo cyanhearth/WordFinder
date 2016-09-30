@@ -19,12 +19,14 @@ public class LoadDictionaryFragment extends Fragment {
 
     public ArrayList<String> words;
 
+    public LoadDictionaryTask task;
+
     public static LoadDictionaryFragment newInstance () {
         return new LoadDictionaryFragment();
     }
 
     public void startTask() {
-        LoadDictionaryTask task = new LoadDictionaryTask();
+        task = new LoadDictionaryTask();
         task.execute(currentDict);
     }
 
@@ -100,7 +102,6 @@ public class LoadDictionaryFragment extends Fragment {
             if (!isAdded()) {
                 cancel(true);
             }
-
             //read in dictionary
             BufferedReader st = new BufferedReader(new InputStreamReader(getResources()
                     .openRawResource(resourceId)));
@@ -111,8 +112,7 @@ public class LoadDictionaryFragment extends Fragment {
                     words.add(line.toLowerCase());
                 }
                 st.close();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
 
@@ -120,7 +120,7 @@ public class LoadDictionaryFragment extends Fragment {
         }
 
         protected void onPostExecute(ArrayList<String> args) {
-            if (callbacks.get() != null) {
+            if (isAdded() && callbacks.get() != null) {
                 callbacks.get().setDictionary(args);
             }
         }
