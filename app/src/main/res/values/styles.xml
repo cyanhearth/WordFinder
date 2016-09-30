@@ -23,4 +23,8 @@
     <style name="TextAppearance">
         <item name="android:textColor">@color/white</item>
     </style>
+
+    <style name="CustomDialog" parent="@style/Theme.AppCompat.Light.Dialog">
+        <item name="android:windowNoTitle">false</item>
+    </style>
 </resources>

@@ -24,6 +24,10 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
+import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
+
 public class MainActivity extends AppCompatActivity{
     private static final String BASE_URI = "https://en.wiktionary.org/wiki/";
 
@@ -44,6 +48,8 @@ public class MainActivity extends AppCompatActivity{
 
     private static final int MAX_LETTERS = 16;
     private static final int MAX_BLANKS_SEARCH = 2;
+
+    private static final String SHOWCASE_ID = "startup_showcase";
 
     // Current network preference
     public static boolean wifiOnly;
@@ -79,7 +85,7 @@ public class MainActivity extends AppCompatActivity{
 
         // set up keyboard
         // Create the Keyboard
-        Keyboard keyboard = new Keyboard(this, R.xml.keyboard);
+        final Keyboard keyboard = new Keyboard(this, R.xml.keyboard);
 
         // Lookup the KeyboardView
         keyboardView = (KeyboardView) findViewById(R.id.keyboardview);
@@ -302,6 +308,16 @@ public class MainActivity extends AppCompatActivity{
                                     getResources().getString(R.string.include_message), includeWord);
                             includeTextView.setText(text);
                             lettersInput.setText("");
+                            DisplayExpandableResultFragment fragment =
+                                    (DisplayExpandableResultFragment) getSupportFragmentManager()
+                                            .findFragmentByTag(TAG_RESULTS_FRAGMENT);
+                            if (fragment != null) {
+                                if (fragment.findWordsTask.getStatus() != AsyncTask.Status.FINISHED) {
+                                    fragment.findWordsTask.cancel(true);
+                                }
+                                getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+                            }
+                            keyboardView.setVisibility(View.VISIBLE);
                         }
                     } else {
                         Snackbar.make(v,
@@ -310,6 +326,57 @@ public class MainActivity extends AppCompatActivity{
                     }
                 }
             });
+        }
+
+        // on first run, show tutorial and allow user to choose
+        // their preferred dictionary
+        ShowcaseConfig config = new ShowcaseConfig();
+        config.setDelay(500);
+
+        MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(this, SHOWCASE_ID);
+
+        sequence.setConfig(config);
+
+        String nextString = getResources().getString(R.string.intro_next);
+        String dismissString = getResources().getString(R.string.intro_dismiss);
+        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
+                .setTarget(search)
+                .setDismissText(nextString)
+                .setContentText(getResources().getString(R.string.intro_search))
+                .withRectangleShape()
+                .build());
+        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
+                .setTarget(define)
+                .setDismissText(nextString)
+                .setContentText(getResources().getString(R.string.intro_define))
+                .withRectangleShape()
+                .build());
+        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
+                .setTarget(include)
+                .setDismissText(nextString)
+                .setContentText(getResources().getString(R.string.intro_include))
+                .withRectangleShape()
+                .build());
+        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
+                .setTarget(clear)
+                .setDismissText(dismissString)
+                .setContentText(getResources().getString(R.string.intro_clear))
+                .withRectangleShape()
+                .build());
+
+        sequence.start();
+
+
+        Boolean firstRun = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("first_run", true);
+        if (firstRun) {
+            DialogFragment setDefaultDictionaryFragment = SetDefaultDictionaryFragment.newInstance();
+            setDefaultDictionaryFragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.CustomDialog);
+            setDefaultDictionaryFragment.show(getFragmentManager(), TAG_DIALOG);
+
+            PreferenceManager.getDefaultSharedPreferences(this)
+                    .edit()
+                    .putBoolean("first_run", false)
+                    .apply();
         }
     }
 

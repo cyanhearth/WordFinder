@@ -9,6 +9,7 @@
 
     <!-- application strings -->
     <string name="action_settings">Settings</string>
+    <string name="action_help">Help</string>
     <string name="title_activity_help">HelpActivity</string>
     <string name="enter_letters">Enter your letters…</string>
     <string name="include_message">Including \"%1$s\"</string>
@@ -21,6 +22,8 @@
     <string name="orderby_points">points</string>
     <string name="chooser_text">Open with…</string>
     <string name="no_results">No results</string>
+    <string name="welcome">\nSelect the dictionary you would like the app
+        to use\nThis can be changed at any time in the Settings menu</string>
 
     <!-- dictionary references -->
     <string name="sowpods">SOWPODS</string>
@@ -47,6 +50,16 @@
     <string name="search_exceeds_wild">Use %1$d \'blanks\' or less in your search</string>
     <string name="search_exceeds_max">Enter %1$d letters or less</string>
 
+    <string name="dict_set">Default dictionary set to %1$s</string>
+
+    <!-- intro strings-->
+    <string name="intro_search">Enter up to 16 letters (including 2 \'_\') and press here to search</string>
+    <string name="intro_define">Enter a word and tap here to see its definition</string>
+    <string name="intro_include">Enter a pattern to include in your search and tap here (do this before you tap search!)</string>
+    <string name="intro_clear">Tap here to start over\n\nYou can find more details in the Help screen, located top right</string>
+    <string name="intro_next">OK</string>
+    <string name="intro_dismiss">GOT IT</string>
+
     <!-- help screen text -->
     <string name="help_search">Enter up to 16 letters and hit search to find all possible words in
         the currently selected dictionary.\n\nThe \'_\' character is used as a \'blank\' or
@@ -64,6 +77,6 @@
     <string name="help_settings">In the settings menu, you can choose which dictionary to use, the
         order search results should be listed in, and the minimum length of the results.\n\nYou can
         also set whether or not the app can retrieve definitions using network data or on wifi
-        only\n\nWord values are based on Scrabble&#8482; scoring.</string>
+        only.\n\nWord values are based on Scrabble&#8482; scoring.</string>
 
 </resources>
