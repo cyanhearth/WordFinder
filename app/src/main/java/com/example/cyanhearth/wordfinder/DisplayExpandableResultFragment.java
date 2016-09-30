@@ -554,7 +554,7 @@ public class DisplayExpandableResultFragment extends Fragment {
         protected void onPostExecute(ArrayList<Group> groups) {
             // if upon trying to restore the fragments previous state the wordlist is null, reset
             // the app to it's starting conditions
-            if (callbacks.get() != null) {
+            if (isAdded() && callbacks.get() != null) {
                 if (groups == null) {
                     callbacks.get().reset();
                 } else {

@@ -207,25 +207,37 @@ public class MainActivity extends AppCompatActivity{
                                         MAX_LETTERS),
                                 Snackbar.LENGTH_SHORT).show();
                     } else {
-                        DisplayExpandableResultFragment fragment = DisplayExpandableResultFragment.newInstance();
-                        Bundle args = new Bundle();
-                        if (letters.equals("")) {
-                            for (int i = 0; i < includeWord.length(); i++) {
-                                if (includeWord.charAt(i) == '_') {
-                                    letters += "_";
+                        LoadDictionaryFragment frag = (LoadDictionaryFragment) manager.findFragmentByTag(TAG_TASK_FRAGMENT);
+
+                        if (frag != null && ((AsyncTask) frag.task).getStatus() == AsyncTask.Status.FINISHED) {
+                            DisplayExpandableResultFragment resFrag = (DisplayExpandableResultFragment) manager.findFragmentByTag(TAG_RESULTS_FRAGMENT);
+                            boolean isReady = true;
+                            if (resFrag != null && ((AsyncTask) resFrag.findWordsTask).getStatus() != AsyncTask.Status.FINISHED) {
+                                isReady = false;
+                            }
+                            if (isReady) {
+                                DisplayExpandableResultFragment fragment = DisplayExpandableResultFragment.newInstance();
+                                Bundle args = new Bundle();
+                                if (letters.equals("")) {
+                                    for (int i = 0; i < includeWord.length(); i++) {
+                                        if (includeWord.charAt(i) == '_') {
+                                            letters += "_";
+                                        }
+                                    }
                                 }
+
+                                args.putString(LETTERS_KEY, letters);
+                                args.putString(INCLUDE_KEY, includeWord);
+                                fragment.setArguments(args);
+                                manager.beginTransaction()
+                                        .replace(R.id.fragment_container,
+                                                fragment,
+                                                TAG_RESULTS_FRAGMENT).commit();
+
+                                includeWord = null;
+                                keyboardView.setVisibility(View.GONE);
                             }
                         }
-                        args.putString(LETTERS_KEY, letters);
-                        args.putString(INCLUDE_KEY, includeWord);
-                        fragment.setArguments(args);
-                        manager.beginTransaction()
-                                .replace(R.id.fragment_container,
-                                        fragment,
-                                        TAG_RESULTS_FRAGMENT).commit();
-
-                        includeWord = null;
-                        keyboardView.setVisibility(View.GONE);
                     }
                 }
             });
