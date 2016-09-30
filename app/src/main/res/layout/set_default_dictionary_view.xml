@@ -7,12 +7,15 @@
     <TextView
         android:text="@string/welcome"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
         android:id="@+id/textView2"
         android:textAppearance="@style/TextAppearance.AppCompat"
-        android:textStyle="normal|bold"
-        android:textAlignment="center"
-        android:gravity="center_horizontal" />
+        android:textAllCaps="false"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp"
+        android:paddingEnd="25dp"
+        android:paddingStart="25dp"
+        android:paddingBottom="20dp" />
 
     <ListView
         android:id="@+id/dictList"
