@@ -13,6 +13,8 @@
         <item name="actionOverflowMenuStyle">@style/AppTheme.Overflow</item>
 
         <item name="android:itemTextAppearance">@style/TextAppearance</item>
+        <item name="android:dialogTheme">@style/CustomDialog</item>
+        <item name="android:alertDialogTheme">@style/CustomDialog</item>
 
     </style>
 
@@ -24,7 +26,15 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="CustomDialog" parent="@style/Theme.AppCompat.Light.Dialog">
+    <style name="CustomDialog" parent="Theme.AppCompat.DayNight.Dialog">
         <item name="android:windowNoTitle">false</item>
+        <!-- Used for the buttons -->
+        <item name="colorAccent">@color/accent</item>
+        <!-- Used for the title and text -->
+        <item name="android:textColorPrimary">@color/white</item>
+        <!-- Used for the background -->
+        <item name="android:background">@color/primary</item>
     </style>
+
+
 </resources>

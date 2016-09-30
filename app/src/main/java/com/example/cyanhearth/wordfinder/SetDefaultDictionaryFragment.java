@@ -1,15 +1,20 @@
 package com.example.cyanhearth.wordfinder;
 
 import android.app.DialogFragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
+
+import java.util.List;
 
 /**
  * Created by Craig on 27/09/2016.
@@ -39,7 +44,7 @@ public class SetDefaultDictionaryFragment extends DialogFragment implements Adap
 
         dictionaries = getResources().getStringArray(R.array.dictionaries);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
+        CustomAdapter<String> adapter = new CustomAdapter<>(getActivity(),
                 android.R.layout.simple_list_item_1, dictionaries);
 
         dictList.setAdapter(adapter);
@@ -63,5 +68,20 @@ public class SetDefaultDictionaryFragment extends DialogFragment implements Adap
                 String.format(getResources().getString(R.string.dict_set),
                         dictionaries[position]),
                 Snackbar.LENGTH_SHORT).show();
+    }
+
+    public class CustomAdapter<t> extends ArrayAdapter {
+
+        public CustomAdapter(Context context, int resource, Object[] objects) {
+            super(context, resource, objects);
+        }
+
+        public View getView(int position, View convertView, ViewGroup parent) {
+            TextView tv = (TextView) super.getView(position, convertView, parent);
+
+            tv.setTextColor(ContextCompat.getColor(getActivity(), R.color.white));
+
+            return tv;
+        }
     }
 }
