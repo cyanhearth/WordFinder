@@ -43,18 +43,15 @@ public class SetDefaultDictionaryFragment extends DialogFragment implements Adap
 
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        if (context instanceof MainActivity) {
-            callbacks = new WeakReference<>((MainActivity) context);
-        }
-    }
-
 
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        Context ctx = getActivity();
+
+        if (ctx instanceof MainActivity) {
+            callbacks = new WeakReference<>((MainActivity) ctx);
+        }
 
         dictionaries = getResources().getStringArray(R.array.dictionaries);
 
@@ -81,7 +78,7 @@ public class SetDefaultDictionaryFragment extends DialogFragment implements Adap
                 .putString(SettingsActivity.DICTIONARY_KEY, dictValue)
                 .apply();
 
-        if (isAdded() && callbacks.get() != null) {
+        if (callbacks.get() != null) {
             callbacks.get().loadDictionary(dictValue);
         }
     }
