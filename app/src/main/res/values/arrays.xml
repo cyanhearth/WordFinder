@@ -4,6 +4,7 @@
         <item>SOWPODS (International English, Scrabble)</item>
         <item>OSPD (US English, Scrabble)</item>
         <item>CSW15 (UK English, Scrabble)</item>
+        <item>ENABLE1 (Original)</item>
         <item>ENABLE1 (Words with Friends)</item>
     </string-array>
 
@@ -12,6 +13,7 @@
         <item>OSPD</item>
         <item>CSW15</item>
         <item>ENABLE1</item>
+        <item>WWF</item>
     </string-array>
 
     <string-array name="word_length_values">

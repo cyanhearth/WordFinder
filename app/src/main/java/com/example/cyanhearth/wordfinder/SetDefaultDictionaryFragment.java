@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 /**
@@ -24,6 +25,9 @@ public class SetDefaultDictionaryFragment extends DialogFragment implements Adap
 
     ListView dictList;
     String[] dictionaries;
+
+    private WeakReference<MainActivity> callbacks;
+
     public static SetDefaultDictionaryFragment newInstance() {
         return new SetDefaultDictionaryFragment();
     }
@@ -38,6 +42,16 @@ public class SetDefaultDictionaryFragment extends DialogFragment implements Adap
         return v;
 
     }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (context instanceof MainActivity) {
+            callbacks = new WeakReference<>((MainActivity) context);
+        }
+    }
+
 
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -58,16 +72,18 @@ public class SetDefaultDictionaryFragment extends DialogFragment implements Adap
 
         String dictString = dictionaries[position];
         String dictValue = dictString.substring(0, dictString.indexOf(" "));
+        if (position == dictionaries.length - 1) {
+            dictValue = "WWF";
+        }
 
         PreferenceManager.getDefaultSharedPreferences(getActivity())
                 .edit()
                 .putString(SettingsActivity.DICTIONARY_KEY, dictValue)
                 .apply();
 
-        Snackbar.make(getActivity().findViewById(R.id.layout),
-                String.format(getResources().getString(R.string.dict_set),
-                        dictionaries[position]),
-                Snackbar.LENGTH_SHORT).show();
+        if (isAdded() && callbacks.get() != null) {
+            callbacks.get().loadDictionary(dictValue);
+        }
     }
 
     public class CustomAdapter<t> extends ArrayAdapter {
