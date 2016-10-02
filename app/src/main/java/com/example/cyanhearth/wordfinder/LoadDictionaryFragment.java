@@ -94,6 +94,9 @@ public class LoadDictionaryFragment extends Fragment {
                 case "ENABLE1":
                     resourceId = R.raw.enable1;
                     break;
+                case "WWF":
+                    resourceId = R.raw.wwf;
+                    break;
                 default:
                     resourceId = R.raw.sowpods;
                     break;

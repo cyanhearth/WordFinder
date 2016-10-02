@@ -234,7 +234,6 @@ public class MainActivity extends AppCompatActivity{
                                                 fragment,
                                                 TAG_RESULTS_FRAGMENT).commit();
 
-                                includeWord = null;
                                 keyboardView.setVisibility(View.GONE);
                             }
                         }
@@ -456,11 +455,7 @@ public class MainActivity extends AppCompatActivity{
 
         if (!dict.equals(currentDictString)) {
 
-            FragmentManager manager = this.getSupportFragmentManager();
-
-            LoadDictionaryFragment dictFragment = (LoadDictionaryFragment) manager.findFragmentByTag(TAG_TASK_FRAGMENT);
-            dictFragment.setCurrentDict(dict);
-            dictFragment.startTask();
+            loadDictionary(dict);
         }
 
     }
@@ -531,5 +526,13 @@ public class MainActivity extends AppCompatActivity{
 
         includeTextView.setText("");
         lettersInput.setText("");
+    }
+
+    public void loadDictionary(String dict) {
+        FragmentManager manager = this.getSupportFragmentManager();
+
+        LoadDictionaryFragment dictFragment = (LoadDictionaryFragment) manager.findFragmentByTag(TAG_TASK_FRAGMENT);
+        dictFragment.setCurrentDict(dict);
+        dictFragment.startTask();
     }
 }

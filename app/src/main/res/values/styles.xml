@@ -14,7 +14,7 @@
 
         <item name="android:itemTextAppearance">@style/TextAppearance</item>
         <item name="android:dialogTheme">@style/CustomDialog</item>
-        <item name="android:alertDialogTheme">@style/CustomDialog</item>
+        <item name="android:alertDialogTheme">@style/CustomAlertDialog</item>
 
     </style>
 
@@ -26,7 +26,7 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="CustomDialog" parent="Theme.AppCompat.DayNight.Dialog">
+    <style name="CustomDialog" parent="Theme.AppCompat.Light.Dialog">
         <item name="android:windowNoTitle">false</item>
         <!-- Used for the buttons -->
         <item name="colorAccent">@color/accent</item>
@@ -34,6 +34,12 @@
         <item name="android:textColorPrimary">@color/white</item>
         <!-- Used for the background -->
         <item name="android:background">@color/primary</item>
+    </style>
+
+    <style name="CustomAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <!-- Used for the buttons -->
+        <item name="colorAccent">@color/accent</item>
+
     </style>
 
 
